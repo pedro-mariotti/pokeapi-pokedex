@@ -4,24 +4,26 @@ import PokeCardSearch from "@/components/PokeCardSearch";
 import PokeTeam from "@/components/PokeTeam";
 import { useState } from "react";
 import EeveePlaceholder from "../../public/klipartz.com.png";
+import PokeDetailsModal from "@/components/PokeDetailsModal";
 
 export default function Home() {
   const [searchPokemonName, setSearchPokemonName] = useState(
     "Pesquisar pokemon...",
   );
+  const [openModal, setOpenModal] = useState(false);
   return (
     <div className="max-h-max min-h-screen w-screen">
+      <PokeDetailsModal show_modal={openModal} setOpenModal={setOpenModal} />
       <main className="mt-16 flex flex-col gap-16">
-        <section className="flex justify-center gap-4">
+        {/* <section className="flex items-center justify-center gap-4">
           <div className="flex gap-16">
             <PokeTeam bg_color="red" />
-            {/* bg_color só compara se o bg_color == "red", outras cores n foram imlemetnadas ainda */}
             <PokeTeam bg_color="blue" />
           </div>
           <div>
             <h1 className="text-5xl">Comparação de stats</h1>
           </div>
-        </section>
+        </section> */}
         <section className="flex flex-col items-center justify-center gap-12">
           <form
             action=""
@@ -43,15 +45,51 @@ export default function Home() {
             />
           </form>
           <ul className="grid w-[85%] grid-cols-6 gap-4">
-            <PokeCardSearch poke_image={EeveePlaceholder} />
-            <PokeCardSearch poke_image={EeveePlaceholder} />
-            <PokeCardSearch poke_image={EeveePlaceholder} />
-            <PokeCardSearch poke_image={EeveePlaceholder} />
-            <PokeCardSearch poke_image={EeveePlaceholder} />
-            <PokeCardSearch poke_image={EeveePlaceholder} />
-            <PokeCardSearch poke_image={EeveePlaceholder} />
-            <PokeCardSearch poke_image={EeveePlaceholder} />
-            <PokeCardSearch poke_image={EeveePlaceholder} />
+            <PokeCardSearch
+              poke_types={["normal", "fire"]}
+              setOpenModal={setOpenModal}
+              poke_image={EeveePlaceholder}
+            />
+            <PokeCardSearch
+              poke_types={["water", "flying"]}
+              setOpenModal={setOpenModal}
+              poke_image={EeveePlaceholder}
+            />
+            <PokeCardSearch
+              poke_types={["normal", "fire"]}
+              setOpenModal={setOpenModal}
+              poke_image={EeveePlaceholder}
+            />
+            <PokeCardSearch
+              poke_types={["normal", "fire"]}
+              setOpenModal={setOpenModal}
+              poke_image={EeveePlaceholder}
+            />
+            <PokeCardSearch
+              poke_types={["normal", "fire"]}
+              setOpenModal={setOpenModal}
+              poke_image={EeveePlaceholder}
+            />
+            <PokeCardSearch
+              poke_types={["normal", "fire"]}
+              setOpenModal={setOpenModal}
+              poke_image={EeveePlaceholder}
+            />
+            <PokeCardSearch
+              poke_types={["normal", "fire"]}
+              setOpenModal={setOpenModal}
+              poke_image={EeveePlaceholder}
+            />
+            <PokeCardSearch
+              poke_types={["normal", "fire"]}
+              setOpenModal={setOpenModal}
+              poke_image={EeveePlaceholder}
+            />
+            <PokeCardSearch
+              poke_types={["normal", "fire"]}
+              setOpenModal={setOpenModal}
+              poke_image={EeveePlaceholder}
+            />
           </ul>
         </section>
       </main>
