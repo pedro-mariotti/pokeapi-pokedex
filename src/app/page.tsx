@@ -10,10 +10,18 @@ export default function Home() {
   const [searchPokemonName, setSearchPokemonName] = useState(
     "Pesquisar pokemon...",
   );
+  const [modalTypeArray, setModalTypeArray] = useState([]);
   const [openModal, setOpenModal] = useState(false);
   return (
     <div className="max-h-max min-h-screen w-screen">
-      <PokeDetailsModal show_modal={openModal} setOpenModal={setOpenModal} />
+      <PokeDetailsModal
+        poke_image={EeveePlaceholder}
+        show_modal={openModal}
+        setOpenModal={setOpenModal}
+        poke_types={["normal", "fire"]}
+        poke_desc="Lorem ipsum dolor sit amet consectetur, adipisicing elit. Laboriosam quam voluptatibus fuga architecto repudiandae non, consectetur quidem placeat optio expedita dolore eum suscipit eligendi esse explicabo! Minima asperiores impedit eveniet."
+      />
+
       <main className="mt-16 flex flex-col gap-16">
         {/* <section className="flex items-center justify-center gap-4">
           <div className="flex gap-16">
@@ -46,46 +54,55 @@ export default function Home() {
           </form>
           <ul className="grid w-[85%] grid-cols-6 gap-4">
             <PokeCardSearch
+              setModalTypeArray={setModalTypeArray}
               poke_types={["normal", "fire"]}
               setOpenModal={setOpenModal}
               poke_image={EeveePlaceholder}
             />
             <PokeCardSearch
+              setModalTypeArray={setModalTypeArray}
               poke_types={["water", "flying"]}
               setOpenModal={setOpenModal}
               poke_image={EeveePlaceholder}
             />
             <PokeCardSearch
+              setModalTypeArray={setModalTypeArray}
               poke_types={["normal", "fire"]}
               setOpenModal={setOpenModal}
               poke_image={EeveePlaceholder}
             />
             <PokeCardSearch
+              setModalTypeArray={setModalTypeArray}
               poke_types={["normal", "fire"]}
               setOpenModal={setOpenModal}
               poke_image={EeveePlaceholder}
             />
             <PokeCardSearch
+              setModalTypeArray={setModalTypeArray}
               poke_types={["normal", "fire"]}
               setOpenModal={setOpenModal}
               poke_image={EeveePlaceholder}
             />
             <PokeCardSearch
+              setModalTypeArray={setModalTypeArray}
               poke_types={["normal", "fire"]}
               setOpenModal={setOpenModal}
               poke_image={EeveePlaceholder}
             />
             <PokeCardSearch
+              setModalTypeArray={setModalTypeArray}
               poke_types={["normal", "fire"]}
               setOpenModal={setOpenModal}
               poke_image={EeveePlaceholder}
             />
             <PokeCardSearch
+              setModalTypeArray={setModalTypeArray}
               poke_types={["normal", "fire"]}
               setOpenModal={setOpenModal}
               poke_image={EeveePlaceholder}
             />
             <PokeCardSearch
+              setModalTypeArray={setModalTypeArray}
               poke_types={["normal", "fire"]}
               setOpenModal={setOpenModal}
               poke_image={EeveePlaceholder}

@@ -6,6 +6,7 @@ export default function PokeCardSearch(props: {
   poke_image: string | StaticImageData;
   setOpenModal: Dispatch<SetStateAction<boolean>>;
   poke_types: Array<string>;
+  setModalTypeArray: Dispatch<SetStateAction<string[]>>;
 }) {
   return (
     <li
