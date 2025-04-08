@@ -18,7 +18,7 @@ export default function Home() {
     {
       poke_number: 1,
       poke_name: "Pokemon 1",
-      poke_types: ["normal", "fire"],
+      poke_types: ["normal"],
       poke_desc:
         "Lorem ipsum dolor sit amet consectetur, adipisicing elit. Natus magni ex commodi facilis cumque quam? Numquam, cumque eum eos, porro consequatur incidunt necessitatibus a omnis praesentium neque quod, impedit aperiam!",
     },

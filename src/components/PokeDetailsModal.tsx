@@ -31,7 +31,7 @@ export default function PokeDetailsModal(props: {
           <Image src={props.poke_image} alt="pokemon image" className="w-64" />
           <div className="flex flex-col items-start justify-start gap-4">
             <div className="flex flex-col items-center justify-center gap-2">
-              <h2 className="font-bold">
+              <h2 className="text-2xl font-bold">
                 <span>#{props.poke_number} </span>
                 {props.poke_name}
               </h2>
