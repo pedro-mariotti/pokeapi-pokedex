@@ -13,6 +13,30 @@ export default function Home() {
   const [openModal, setOpenModal] = useState(false);
   const [modalPokeName, setmodalPokeName] = useState("");
   const [modalPokeNumber, setmodalPokeNumber] = useState(1);
+  const [modalPokeDesc, setModalPokeDesc] = useState(" ");
+  const tempPokeData = [
+    {
+      poke_number: 1,
+      poke_name: "Pokemon 1",
+      poke_types: ["normal", "fire"],
+      poke_desc:
+        "Lorem ipsum dolor sit amet consectetur, adipisicing elit. Natus magni ex commodi facilis cumque quam? Numquam, cumque eum eos, porro consequatur incidunt necessitatibus a omnis praesentium neque quod, impedit aperiam!",
+    },
+    {
+      poke_number: 2,
+      poke_name: "Pokemon 2",
+      poke_types: ["water", "grass"],
+      poke_desc:
+        "Lorem ipsum dolor sit amet consectetur, adipisicing elit. Natus magni ex commodi facilis cumque quam? Numquam, cumque eum eos, porro consequatur incidunt necessitatibus a omnis praesentium neque quod, impedit aperiam!",
+    },
+    {
+      poke_number: 3,
+      poke_name: "Pokemon 3",
+      poke_types: ["poison", "flying"],
+      poke_desc:
+        "Lorem ipsum dolor sit amet consectetur, adipisicing elit. Natus magni ex commodi facilis cumque quam? Numquam, cumque eum eos, porro consequatur incidunt necessitatibus a omnis praesentium neque quod, impedit aperiam!",
+    },
+  ];
   return (
     <div className="max-h-max min-h-screen w-screen">
       <PokeDetailsModal
@@ -21,8 +45,8 @@ export default function Home() {
         poke_types={modalTypeArray}
         poke_image={EeveePlaceholder}
         show_modal={openModal}
+        poke_desc={modalPokeDesc}
         setOpenModal={setOpenModal}
-        poke_desc="Lorem ipsum dolor sit amet consectetur, adipisicing elit. Laboriosam quam voluptatibus fuga architecto repudiandae non, consectetur quidem placeat optio expedita dolore eum suscipit eligendi esse explicabo! Minima asperiores impedit eveniet."
       />
 
       <main className="mt-16 flex flex-col gap-16">
@@ -55,27 +79,22 @@ export default function Home() {
               value="Pesquisar"
             />
           </form>
-          <ul className="grid w-[85%] grid-cols-6 gap-4">
-            <PokeCardSearch
-              poke_name="Pokemon 2"
-              poke_number={1}
-              setModalTypeArray={setModalTypeArray}
-              poke_types={["normal", "fire"]}
-              setOpenModal={setOpenModal}
-              setModalPokeName={setmodalPokeName}
-              setmodalPokeNumber={setmodalPokeNumber}
-              poke_image={EeveePlaceholder}
-            />
-            <PokeCardSearch
-              poke_name="Pokemon 1"
-              poke_number={2}
-              setModalTypeArray={setModalTypeArray}
-              poke_types={["water", "flying"]}
-              setOpenModal={setOpenModal}
-              setModalPokeName={setmodalPokeName}
-              setmodalPokeNumber={setmodalPokeNumber}
-              poke_image={EeveePlaceholder}
-            />
+          <ul className="grid w-[90%] grid-cols-6 gap-8">
+            {tempPokeData.map((pokemon) => (
+              <PokeCardSearch
+                key={pokemon.poke_number}
+                poke_name={pokemon.poke_name}
+                poke_number={pokemon.poke_number}
+                poke_desc={pokemon.poke_desc}
+                poke_types={pokemon.poke_types}
+                setModalTypeArray={setModalTypeArray}
+                setOpenModal={setOpenModal}
+                setModalPokeName={setmodalPokeName}
+                setmodalPokeNumber={setmodalPokeNumber}
+                setModalPokeDesc={setModalPokeDesc}
+                poke_image={EeveePlaceholder}
+              />
+            ))}
           </ul>
         </section>
       </main>
