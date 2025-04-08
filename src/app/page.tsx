@@ -1,7 +1,6 @@
 "use client";
 
 import PokeCardSearch from "@/components/PokeCardSearch";
-import PokeTeam from "@/components/PokeTeam";
 import { useState } from "react";
 import EeveePlaceholder from "../../public/klipartz.com.png";
 import PokeDetailsModal from "@/components/PokeDetailsModal";
@@ -13,9 +12,11 @@ export default function Home() {
   const [modalTypeArray, setModalTypeArray] = useState([""]);
   const [openModal, setOpenModal] = useState(false);
   const [modalPokeName, setmodalPokeName] = useState("");
+  const [modalPokeNumber, setmodalPokeNumber] = useState(1);
   return (
     <div className="max-h-max min-h-screen w-screen">
       <PokeDetailsModal
+        poke_number={modalPokeNumber}
         poke_name={modalPokeName}
         poke_types={modalTypeArray}
         poke_image={EeveePlaceholder}
@@ -57,18 +58,22 @@ export default function Home() {
           <ul className="grid w-[85%] grid-cols-6 gap-4">
             <PokeCardSearch
               poke_name="Pokemon 2"
+              poke_number={1}
               setModalTypeArray={setModalTypeArray}
               poke_types={["normal", "fire"]}
               setOpenModal={setOpenModal}
               setModalPokeName={setmodalPokeName}
+              setmodalPokeNumber={setmodalPokeNumber}
               poke_image={EeveePlaceholder}
             />
             <PokeCardSearch
               poke_name="Pokemon 1"
+              poke_number={2}
               setModalTypeArray={setModalTypeArray}
               poke_types={["water", "flying"]}
               setOpenModal={setOpenModal}
               setModalPokeName={setmodalPokeName}
+              setmodalPokeNumber={setmodalPokeNumber}
               poke_image={EeveePlaceholder}
             />
           </ul>

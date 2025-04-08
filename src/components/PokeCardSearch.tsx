@@ -1,15 +1,17 @@
 import Image, { StaticImageData } from "next/image";
-import { Dispatch, SetStateAction, useState } from "react";
+import { Dispatch, SetStateAction } from "react";
+import PokeType from "./aux components/type";
 
 export default function PokeCardSearch(props: {
   poke_name: string;
   poke_image: string | StaticImageData;
-  setOpenModal: Dispatch<SetStateAction<boolean>>;
   poke_types: Array<string>;
+  poke_number: number;
+  setOpenModal: Dispatch<SetStateAction<boolean>>;
   setModalTypeArray: Dispatch<SetStateAction<string[]>>;
   setModalPokeName: Dispatch<SetStateAction<string>>;
+  setmodalPokeNumber: Dispatch<SetStateAction<number>>;
 }) {
-  const [bgColor, setBgColor] = useState("#fffFFF");
   return (
     <li
       className="flex h-fit w-fit cursor-pointer rounded-xl bg-[#f1f1f1] p-4"
@@ -17,19 +19,19 @@ export default function PokeCardSearch(props: {
         props.setOpenModal(true);
         props.setModalPokeName(props.poke_name);
         props.setModalTypeArray(props.poke_types);
+        props.setmodalPokeNumber(props.poke_number);
       }}
     >
       <Image alt="pokemon image" src={props.poke_image} className="w-16" />
       <div>
-        <p>{props.poke_name}</p>
+        <p>
+          <span>#{props.poke_number} </span>
+          {props.poke_name}
+        </p>
         <div>
-          <ul>
-            <li className={`flex gap-2 bg-[${bgColor}]`}>
-              <p>{props.poke_types[0]}</p>
-            </li>
-            <li className="flex gap-2">
-              <p>{props.poke_types[1]}</p>
-            </li>
+          <ul className="flex flex-col gap-2">
+            <PokeType type={props.poke_types[0]} />
+            <PokeType type={props.poke_types[1]} />
           </ul>
         </div>
       </div>
