@@ -1,16 +1,16 @@
-import Image, { StaticImageData } from "next/image";
+import Image from "next/image";
 
-export default function PokeCardTeam(props: {
-  poke_name: string;
-  poke_image: string | StaticImageData;
-}) {
+export default function PokeCardTeam({ poke_image }: { poke_image: string }) {
   return (
-    <li className="flex h-fit w-fit rounded-xl bg-[#f1f1f1] p-4">
-      <Image alt="pokemon image" src={props.poke_image} className="w-16" />
-      <div>
-        <p>Pokemon Name</p>
-        <p>Type</p>
-      </div>
-    </li>
+    <div className="flex flex-col items-center">
+      <Image
+        src={poke_image}
+        alt="Pokemon"
+        width={96}
+        height={96}
+        className="h-24 w-24"
+      />
+      <span className="mt-2 text-sm">Pokemon</span>
+    </div>
   );
 }
