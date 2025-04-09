@@ -1,104 +1,121 @@
 "use client";
-
-import PokeCardSearch from "@/components/PokeCardSearch";
-import { useState } from "react";
-import EeveePlaceholder from "../../public/klipartz.com.png";
-import PokeDetailsModal from "@/components/PokeDetailsModal";
+import { useState, useEffect } from "react";
+import PokeTeamSlot from "@/components/PokeTeamSlot";
+import PokeEvolution from "@/components/PokeEvolution";
+import { fetchPokemonList, fetchTypeAdvantages } from "@/utils/pokeapi";
 
 export default function Home() {
-  const [searchPokemonName, setSearchPokemonName] = useState(
-    "Pesquisar pokemon...",
-  );
-  const [modalTypeArray, setModalTypeArray] = useState([""]);
-  const [openModal, setOpenModal] = useState(false);
-  const [modalPokeName, setmodalPokeName] = useState("");
-  const [modalPokeNumber, setmodalPokeNumber] = useState(1);
-  const [modalPokeDesc, setModalPokeDesc] = useState(" ");
-  const tempPokeData = [
-    {
-      poke_number: 1,
-      poke_name: "Pokemon 1",
-      poke_types: ["normal"],
-      poke_desc:
-        "Lorem ipsum dolor sit amet consectetur, adipisicing elit. Natus magni ex commodi facilis cumque quam? Numquam, cumque eum eos, porro consequatur incidunt necessitatibus a omnis praesentium neque quod, impedit aperiam!",
-    },
-    {
-      poke_number: 2,
-      poke_name: "Pokemon 2",
-      poke_types: ["water", "grass"],
-      poke_desc:
-        "Lorem ipsum dolor sit amet consectetur, adipisicing elit. Natus magni ex commodi facilis cumque quam? Numquam, cumque eum eos, porro consequatur incidunt necessitatibus a omnis praesentium neque quod, impedit aperiam!",
-    },
-    {
-      poke_number: 3,
-      poke_name: "Pokemon 3",
-      poke_types: ["poison", "flying"],
-      poke_desc:
-        "Lorem ipsum dolor sit amet consectetur, adipisicing elit. Natus magni ex commodi facilis cumque quam? Numquam, cumque eum eos, porro consequatur incidunt necessitatibus a omnis praesentium neque quod, impedit aperiam!",
-    },
-  ];
+  const [team, setTeam] = useState<(string | null)[]>([null, null, null, null, null, null]);
+  const [pokemonList, setPokemonList] = useState<any[]>([]);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
+  const [typeAdvantages, setTypeAdvantages] = useState<any>(null);
+
+  // Busca o pokemon
+  useEffect(() => {
+    const loadPokemonList = async () => {
+      const list = await fetchPokemonList();
+      setPokemonList(list);
+    };
+    loadPokemonList();
+  }, []);
+
+  // Calcula as vantagens e fraquezas do time
+  useEffect(() => {
+    const calculateAdvantages = async () => {
+      const types = team.filter(Boolean) as string[];
+      if (types.length > 0) {
+        const advantages = await fetchTypeAdvantages(types);
+        setTypeAdvantages(advantages);
+      } else {
+        setTypeAdvantages(null);
+      }
+    };
+    calculateAdvantages();
+  }, [team]);
+
+  const handleAddPokemon = (pokemonName: string) => {
+    if (selectedSlot !== null) {
+      const newTeam = [...team];
+      newTeam[selectedSlot] = pokemonName;
+      setTeam(newTeam);
+      setSelectedSlot(null);
+    }
+  };
+
+  const handleRemovePokemon = (slotIndex: number) => {
+    const newTeam = [...team];
+    newTeam[slotIndex] = null;
+    setTeam(newTeam);
+  };
+
   return (
     <div className="max-h-max min-h-screen w-screen">
-      <PokeDetailsModal
-        poke_number={modalPokeNumber}
-        poke_name={modalPokeName}
-        poke_types={modalTypeArray}
-        poke_image={EeveePlaceholder}
-        show_modal={openModal}
-        poke_desc={modalPokeDesc}
-        setOpenModal={setOpenModal}
-      />
+      <header className="bg-red-600 p-4">
+        <div className="container mx-auto flex items-center justify-between">
+          <h1 className="text-3xl font-bold text-white">Pokémon Team Builder</h1>
+        </div>
+      </header>
 
-      <main className="mt-16 flex flex-col gap-16">
-        {/* <section className="flex items-center justify-center gap-4">
-          <div className="flex gap-16">
-            <PokeTeam bg_color="red" />
-            <PokeTeam bg_color="blue" />
+      <main className="container mx-auto mt-8">
+        <section className="grid grid-cols-3 gap-8">
+          <div className="col-span-2">
+            <div className="grid grid-cols-3 gap-4">
+              {team.map((pokemon, index) => (
+                <PokeTeamSlot
+                  key={index}
+                  pokemonName={pokemon}
+                  onAdd={() => setSelectedSlot(index)}
+                  onRemove={() => handleRemovePokemon(index)}
+                  pokemonList={pokemonList}
+                />
+              ))}
+            </div>
+
+            {selectedSlot !== null && (
+              <div className="mt-4">
+                <input
+                  type="text"
+                  placeholder="Pesquisar Pokémon..."
+                  className="mb-4 w-full rounded border p-2"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                <ul className="grid grid-cols-3 gap-4">
+                  {pokemonList
+                    .filter((pokemon) =>
+                      pokemon.name.toLowerCase().includes(searchQuery.toLowerCase())
+                    )
+                    .map((pokemon) => (
+                      <li
+                        key={pokemon.name}
+                        className="cursor-pointer rounded border p-2 hover:bg-gray-200"
+                        onClick={() => handleAddPokemon(pokemon.name)}
+                      >
+                        <img
+                          src={pokemon.sprite}
+                          alt={pokemon.name}
+                          className="h-16 w-16 mx-auto"
+                        />
+                        <p className="text-center capitalize">{pokemon.name}</p>
+                      </li>
+                    ))}
+                </ul>
+              </div>
+            )}
           </div>
-          <div>
-            <h1 className="text-5xl">Comparação de stats</h1>
+        </section>
+
+        {/* Cadeia de Evolução */}
+        <section className="mt-8">
+          <h2 className="mb-4 text-2xl font-bold">Cadeia de Evolução</h2>
+          <div className="grid grid-cols-2 gap-8">
+            {team.map((pokemon, index) =>
+              pokemon ? <PokeEvolution key={index} pokemonName={pokemon} /> : null
+            )}
           </div>
-        </section> */}
-        <section className="flex flex-col items-center justify-center gap-12">
-          <form
-            action=""
-            className="flex w-full items-center justify-center gap-4"
-          >
-            <input
-              type="text"
-              name="searchbar"
-              id=""
-              defaultValue="Pesquisar pokemon..."
-              value={searchPokemonName}
-              onChange={(e) => setSearchPokemonName(e.target.value)}
-              className="w-[80%] rounded-lg bg-[#cecece] p-2"
-            />
-            <input
-              className="rounded-xl bg-red-400 p-2"
-              type="submit"
-              value="Pesquisar"
-            />
-          </form>
-          <ul className="grid w-[90%] grid-cols-6 gap-8">
-            {tempPokeData.map((pokemon) => (
-              <PokeCardSearch
-                key={pokemon.poke_number}
-                poke_name={pokemon.poke_name}
-                poke_number={pokemon.poke_number}
-                poke_desc={pokemon.poke_desc}
-                poke_types={pokemon.poke_types}
-                setModalTypeArray={setModalTypeArray}
-                setOpenModal={setOpenModal}
-                setModalPokeName={setmodalPokeName}
-                setmodalPokeNumber={setmodalPokeNumber}
-                setModalPokeDesc={setModalPokeDesc}
-                poke_image={EeveePlaceholder}
-              />
-            ))}
-          </ul>
         </section>
       </main>
-      <footer className=""></footer>
     </div>
   );
 }
