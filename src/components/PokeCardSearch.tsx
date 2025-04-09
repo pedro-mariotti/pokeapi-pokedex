@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, useEffect } from "react";
 import PokeType from "./aux components/type";
 
 export default function PokeCardSearch(props: {
@@ -16,7 +16,13 @@ export default function PokeCardSearch(props: {
   setModalPokeImage: Dispatch<SetStateAction<string>>;
 }) {
   // console.log(props.poke_image);
-
+  useEffect(() => {
+    const loadPokemonList = async () => {
+      const list = await fetchPokemonList();
+      setPokemonList(list);
+    };
+    loadPokemonList();
+  }, []);
   return (
     <li
       className="flex h-fit w-full cursor-pointer rounded-xl bg-[#f1f1f1] p-4"

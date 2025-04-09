@@ -38,7 +38,7 @@ export default function PokeDetailsModal(props: {
           />
           <div className="flex flex-col items-start justify-start gap-4">
             <div className="flex flex-col items-center gap-2">
-              <h2 className="text-2xl font-bold">
+              <h2 className="text-2xl font-bold uppercase">
                 <span>#{props.poke_number} </span>
                 {props.poke_name}
               </h2>
@@ -50,6 +50,7 @@ export default function PokeDetailsModal(props: {
             </div>
             <p className="text-justify">{props.poke_desc}</p>
             <button
+              className="rounded-3xl border-1 border-black bg-red-50 p-2"
               onClick={() => {
                 props.handleAddPokemon(props.poke_name);
                 props.setOpenModal(false);

@@ -16,6 +16,18 @@ export async function fetchPokemonList() {
   return pokemonList;
 }
 
+export const fetchPokemonSpecies = async (id: number) => {
+  const response = await fetch(
+    `https://pokeapi.co/api/v2/pokemon-species/${id}/`,
+  );
+  if (!response.ok) {
+    throw new Error("Erro ao buscar a espécie do Pokémon");
+  }
+  const data = await response.json();
+  console.log(data);
+  return data;
+};
+
 export async function fetchTypeAdvantages(types: string[]) {
   const weaknesses = new Set<string>();
   const strengths = new Set<string>();

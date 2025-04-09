@@ -2,7 +2,11 @@
 import { useState, useEffect } from "react";
 import PokeTeamSlot from "@/components/PokeTeamSlot";
 import PokeEvolution from "@/components/PokeEvolution";
-import { fetchPokemonList, fetchTypeAdvantages } from "@/utils/pokeapi";
+import {
+  fetchPokemonList,
+  fetchTypeAdvantages,
+  fetchPokemonSpecies,
+} from "@/utils/pokeapi";
 import PokeCardSearch from "../components/PokeCardSearch";
 import PokeDetailsModal from "@/components/PokeDetailsModal";
 import { StaticImageData } from "next/image";
@@ -79,17 +83,17 @@ export default function Home() {
         handleAddPokemon={handleAddPokemon}
       />
       <header className="bg-red-600 p-4">
-        <div className="container mx-auto flex items-center justify-between">
+        <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold text-white">
             Pokémon Team Builder
           </h1>
         </div>
       </header>
 
-      <main className="container mx-auto mt-8">
-        <section className="grid grid-cols-3 gap-8">
-          <div className="col-span-2">
-            <div className="grid grid-cols-3 gap-4">
+      <main className="px-16 pt-8">
+        <section className="flex flex-col gap-8">
+          <div className="grid grid-cols-3">
+            <div className="col-span-2 grid grid-cols-2 rounded-4xl bg-red-50 p-8">
               {team.map((pokemon, index) => (
                 <PokeTeamSlot
                   key={index}
@@ -100,44 +104,47 @@ export default function Home() {
                 />
               ))}
             </div>
-
-            {selectedSlot !== null && (
-              <div className="mt-4">
-                <input
-                  type="text"
-                  placeholder="Pesquisar Pokémon..."
-                  className="mb-4 w-full rounded border p-2"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-                <ul className="grid grid-cols-3 gap-4">
-                  {pokemonList
-                    .filter((pokemon) =>
-                      pokemon.name
-                        .toLowerCase()
-                        .includes(searchQuery.toLowerCase()),
-                    )
-                    .map((pokemon) => (
-                      <PokeCardSearch
-                        key={pokemon.name}
-                        poke_name={pokemon.name}
-                        poke_types={pokemon.types}
-                        poke_image={pokemon.sprite}
-                        poke_number={pokemon.id}
-                        setOpenModal={setOpenModal}
-                        setModalPokeDesc={setModalPokeDesc}
-                        setModalPokeImage={setModalPokeImage}
-                        setModalTypeArray={setModalPokeTypes}
-                        setmodalPokeNumber={setmodalPokeNumber}
-                        setModalPokeName={setmodalPokeName}
-                        poke_desc={""}
-                        // onClick={() => handleAddPokemon(pokemon.name)}
-                      ></PokeCardSearch>
-                    ))}
-                </ul>
-              </div>
-            )}
+            <div>
+              <h2>Estatisticas</h2>
+            </div>
           </div>
+
+          {selectedSlot !== null && (
+            <div className="flex w-full flex-col">
+              <input
+                type="text"
+                placeholder="Pesquisar Pokémon..."
+                className="mb-4 w-full rounded border p-2"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              <ul className="grid grid-cols-3 gap-4">
+                {pokemonList
+                  .filter((pokemon) =>
+                    pokemon.name
+                      .toLowerCase()
+                      .includes(searchQuery.toLowerCase()),
+                  )
+                  .map((pokemon) => (
+                    <PokeCardSearch
+                      key={pokemon.name}
+                      poke_name={pokemon.name}
+                      poke_types={pokemon.types}
+                      poke_image={pokemon.sprite}
+                      poke_number={pokemon.id}
+                      setOpenModal={setOpenModal}
+                      setModalPokeDesc={setModalPokeDesc}
+                      setModalPokeImage={setModalPokeImage}
+                      setModalTypeArray={setModalPokeTypes}
+                      setmodalPokeNumber={setmodalPokeNumber}
+                      setModalPokeName={setmodalPokeName}
+                      poke_desc={""}
+                      // onClick={() => handleAddPokemon(pokemon.name)}
+                    ></PokeCardSearch>
+                  ))}
+              </ul>
+            </div>
+          )}
         </section>
 
         {/* Cadeia de Evolução */}
