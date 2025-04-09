@@ -3,13 +3,30 @@ import { useState, useEffect } from "react";
 import PokeTeamSlot from "@/components/PokeTeamSlot";
 import PokeEvolution from "@/components/PokeEvolution";
 import { fetchPokemonList, fetchTypeAdvantages } from "@/utils/pokeapi";
+import PokeCardSearch from "../components/PokeCardSearch";
+import PokeDetailsModal from "@/components/PokeDetailsModal";
+import { StaticImageData } from "next/image";
 
 export default function Home() {
-  const [team, setTeam] = useState<(string | null)[]>([null, null, null, null, null, null]);
+  const [team, setTeam] = useState<(string | null)[]>([
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+  ]);
   const [pokemonList, setPokemonList] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
   const [typeAdvantages, setTypeAdvantages] = useState<any>(null);
+  const [openModal, setOpenModal] = useState(false);
+
+  const [modalPokeImage, setModalPokeImage] = useState("");
+  const [modalPokeName, setmodalPokeName] = useState("");
+  const [modalPokeNumber, setmodalPokeNumber] = useState(1);
+  const [modalPokeDesc, setModalPokeDesc] = useState(" ");
+  const [modalPokeTypes, setModalPokeTypes] = useState([" "]);
 
   // Busca o pokemon
   useEffect(() => {
@@ -51,9 +68,21 @@ export default function Home() {
 
   return (
     <div className="max-h-max min-h-screen w-screen">
+      <PokeDetailsModal
+        poke_name={modalPokeName}
+        poke_number={modalPokeNumber}
+        poke_image={modalPokeImage}
+        show_modal={openModal}
+        setOpenModal={setOpenModal}
+        poke_types={modalPokeTypes}
+        poke_desc={modalPokeDesc}
+        handleAddPokemon={handleAddPokemon}
+      />
       <header className="bg-red-600 p-4">
         <div className="container mx-auto flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-white">Pokémon Team Builder</h1>
+          <h1 className="text-3xl font-bold text-white">
+            Pokémon Team Builder
+          </h1>
         </div>
       </header>
 
@@ -84,21 +113,26 @@ export default function Home() {
                 <ul className="grid grid-cols-3 gap-4">
                   {pokemonList
                     .filter((pokemon) =>
-                      pokemon.name.toLowerCase().includes(searchQuery.toLowerCase())
+                      pokemon.name
+                        .toLowerCase()
+                        .includes(searchQuery.toLowerCase()),
                     )
                     .map((pokemon) => (
-                      <li
+                      <PokeCardSearch
                         key={pokemon.name}
-                        className="cursor-pointer rounded border p-2 hover:bg-gray-200"
-                        onClick={() => handleAddPokemon(pokemon.name)}
-                      >
-                        <img
-                          src={pokemon.sprite}
-                          alt={pokemon.name}
-                          className="h-16 w-16 mx-auto"
-                        />
-                        <p className="text-center capitalize">{pokemon.name}</p>
-                      </li>
+                        poke_name={pokemon.name}
+                        poke_types={pokemon.types}
+                        poke_image={pokemon.sprite}
+                        poke_number={pokemon.id}
+                        setOpenModal={setOpenModal}
+                        setModalPokeDesc={setModalPokeDesc}
+                        setModalPokeImage={setModalPokeImage}
+                        setModalTypeArray={setModalPokeTypes}
+                        setmodalPokeNumber={setmodalPokeNumber}
+                        setModalPokeName={setmodalPokeName}
+                        poke_desc={""}
+                        // onClick={() => handleAddPokemon(pokemon.name)}
+                      ></PokeCardSearch>
                     ))}
                 </ul>
               </div>
@@ -111,7 +145,9 @@ export default function Home() {
           <h2 className="mb-4 text-2xl font-bold">Cadeia de Evolução</h2>
           <div className="grid grid-cols-2 gap-8">
             {team.map((pokemon, index) =>
-              pokemon ? <PokeEvolution key={index} pokemonName={pokemon} /> : null
+              pokemon ? (
+                <PokeEvolution key={index} pokemonName={pokemon} />
+              ) : null,
             )}
           </div>
         </section>

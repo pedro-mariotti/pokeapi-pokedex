@@ -6,13 +6,13 @@ export async function fetchPokemonList() {
     data.results.map(async (pokemon: any) => {
       const pokemonDetails = await fetch(pokemon.url).then((res) => res.json());
       return {
+        id: pokemonDetails.id,
         name: pokemon.name,
         sprite: pokemonDetails.sprites.front_default,
         types: pokemonDetails.types.map((t: any) => t.type.name),
       };
-    })
+    }),
   );
-
   return pokemonList;
 }
 
@@ -26,12 +26,12 @@ export async function fetchTypeAdvantages(types: string[]) {
 
     // Adiciona fraquezas (double_damage_from)
     data.damage_relations.double_damage_from.forEach((t: any) =>
-      weaknesses.add(t.name)
+      weaknesses.add(t.name),
     );
 
     // Adiciona vantagens (double_damage_to)
     data.damage_relations.double_damage_to.forEach((t: any) =>
-      strengths.add(t.name)
+      strengths.add(t.name),
     );
   }
 
