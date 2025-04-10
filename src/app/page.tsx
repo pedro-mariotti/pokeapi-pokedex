@@ -94,15 +94,17 @@ export default function Home() {
         <section className="flex flex-col gap-8">
           <div className="grid grid-cols-3">
             <div className="col-span-2 grid grid-cols-2 rounded-4xl bg-red-50 p-8">
-              {team.map((pokemon, index) => (
-                <PokeTeamSlot
-                  key={index}
-                  pokemonName={pokemon}
-                  onAdd={() => setSelectedSlot(index)}
-                  onRemove={() => handleRemovePokemon(index)}
-                  pokemonList={pokemonList}
-                />
-              ))}
+              <div className="grid grid-cols-3 gap-6">
+                {team.map((pokemon, index) => (
+                  <PokeTeamSlot
+                    key={index}
+                    pokemonName={pokemon}
+                    onAdd={() => setSelectedSlot(index)}
+                    onRemove={() => handleRemovePokemon(index)}
+                    pokemonList={pokemonList}
+                  />
+                ))}
+              </div>
             </div>
             <div>
               <h2>Estatisticas</h2>

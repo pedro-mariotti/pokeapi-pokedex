@@ -2,6 +2,15 @@ import Image from "next/image";
 import { Dispatch, SetStateAction, useEffect } from "react";
 import PokeType from "./aux components/type";
 
+async function fetchPokemonList() {
+  const response = await fetch("https://pokeapi.co/api/v2/pokemon?limit=100");
+  if (!response.ok) {
+    throw new Error("Erro ao buscar a lista de Pokémon");
+  }
+  const data = await response.json();
+  return data.results;
+}
+
 export default function PokeCardSearch(props: {
   poke_name: string;
   poke_image: string;
@@ -15,14 +24,18 @@ export default function PokeCardSearch(props: {
   setModalPokeDesc: Dispatch<SetStateAction<string>>;
   setModalPokeImage: Dispatch<SetStateAction<string>>;
 }) {
-  // console.log(props.poke_image);
   useEffect(() => {
     const loadPokemonList = async () => {
-      const list = await fetchPokemonList();
-      setPokemonList(list);
+      try {
+        const list = await fetchPokemonList();
+        console.log(list); // Apenas log para depuração
+      } catch (error) {
+        console.error("Erro ao carregar a lista de Pokémon:", error);
+      }
     };
     loadPokemonList();
   }, []);
+
   return (
     <li
       className="flex h-fit w-full cursor-pointer rounded-xl bg-[#f1f1f1] p-4"
@@ -37,10 +50,10 @@ export default function PokeCardSearch(props: {
     >
       <Image
         alt="pokemon image"
-        src={props.poke_image}
-        className="h-16 w-16"
-        width={120}
-        height={96}
+        src={props.poke_image && props.poke_image.trim() !== "" ? props.poke_image : "/placeholder.png"}
+        className="h-20 w-20" // Aumentei o tamanho da imagem
+        width={140}
+        height={140}
       />
       <div>
         <p className="uppercase">

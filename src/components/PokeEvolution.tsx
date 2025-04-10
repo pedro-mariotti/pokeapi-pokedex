@@ -5,6 +5,7 @@ interface Evolution {
   name: string;
   sprite: string;
   method?: string;
+  item?: { name: string; sprite: string };
 }
 
 interface PokeEvolutionProps {
@@ -41,12 +42,19 @@ export default function PokeEvolution({ pokemonName }: PokeEvolutionProps) {
 
           const evolutionDetails = currentEvolution.evolution_details[0];
           let method = "N/A";
+          let item = undefined;
 
           if (evolutionDetails) {
             if (evolutionDetails.min_level) {
               method = `Nível ${evolutionDetails.min_level}`;
             } else if (evolutionDetails.item) {
-              method = `Item: ${evolutionDetails.item.name}`;
+              const itemResponse = await fetch(evolutionDetails.item.url);
+              const itemData = await itemResponse.json();
+              method = `Item: ${itemData.name}`;
+              item = {
+                name: itemData.name,
+                sprite: itemData.sprites.default,
+              };
             }
           }
 
@@ -55,6 +63,7 @@ export default function PokeEvolution({ pokemonName }: PokeEvolutionProps) {
             name: currentEvolution.species.name,
             sprite: pokemonData.sprites.front_default,
             method,
+            item,
           });
 
           currentEvolution = currentEvolution.evolves_to[0] || null;
@@ -82,12 +91,34 @@ export default function PokeEvolution({ pokemonName }: PokeEvolutionProps) {
   return (
     <div className="flex flex-col items-center border rounded-lg p-4 bg-gray-100">
       <h3 className="text-lg font-bold capitalize mb-4">{pokemonName}</h3>
-      <div className="flex gap-4">
-        {evolutions.map((evolution) => (
-          <div key={evolution.id} className="flex flex-col items-center">
-            <img src={evolution.sprite} alt={evolution.name} className="h-16 w-16" />
-            <p className="capitalize font-bold">{evolution.name}</p>
-            <p className="text-sm">{evolution.method}</p>
+      <div className="flex items-center gap-4">
+        {evolutions.map((evolution, index) => (
+          <div key={evolution.id} className="flex items-center">
+            {/* Pokémon Sprite */}
+            <div className="flex flex-col items-center">
+              <img
+                src={evolution.sprite}
+                alt={evolution.name}
+                className="h-16 w-16"
+              />
+              <p className="capitalize font-bold">{evolution.name}</p>
+              <p className="text-sm">{evolution.method}</p>
+              {evolution.item && (
+                <div className="flex items-center gap-2">
+                  <img
+                    src={evolution.item.sprite}
+                    alt={evolution.item.name}
+                    className="h-8 w-8"
+                  />
+                  <span className="text-xs capitalize">{evolution.item.name}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Setinha entre os Pokémon */}
+            {index < evolutions.length - 1 && (
+              <span className="text-2xl font-bold mx-4">→</span>
+            )}
           </div>
         ))}
       </div>
