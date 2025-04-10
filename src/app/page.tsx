@@ -9,7 +9,6 @@ import {
 } from "@/utils/pokeapi";
 import PokeCardSearch from "../components/PokeCardSearch";
 import PokeDetailsModal from "@/components/PokeDetailsModal";
-import { StaticImageData } from "next/image";
 
 export default function Home() {
   const [team, setTeam] = useState<(string | null)[]>([
@@ -44,7 +43,14 @@ export default function Home() {
   // Calcula as vantagens e fraquezas do time
   useEffect(() => {
     const calculateAdvantages = async () => {
-      const types = team.filter(Boolean) as string[];
+      const types = team
+        .filter(Boolean) // Remove slots vazios
+        .map((pokemonName) => {
+          const pokemon = pokemonList.find((p) => p.name === pokemonName);
+          return pokemon?.types || [];
+        })
+        .flat(); // Combina todos os tipos em um único array
+
       if (types.length > 0) {
         const advantages = await fetchTypeAdvantages(types);
         setTypeAdvantages(advantages);
@@ -53,7 +59,7 @@ export default function Home() {
       }
     };
     calculateAdvantages();
-  }, [team]);
+  }, [team, pokemonList]);
 
   const handleAddPokemon = (pokemonName: string) => {
     if (selectedSlot !== null) {
@@ -71,7 +77,7 @@ export default function Home() {
   };
 
   return (
-    <div className="max-h-max min-h-screen w-screen">
+    <div className="max-h-max min-h-screen w-screen bg-gray-50 font-sans">
       <PokeDetailsModal
         poke_name={modalPokeName}
         poke_number={modalPokeNumber}
@@ -82,44 +88,89 @@ export default function Home() {
         poke_desc={modalPokeDesc}
         handleAddPokemon={handleAddPokemon}
       />
-      <header className="bg-red-600 p-4">
+      <header className="bg-gradient-to-r from-red-500 to-red-700 p-6 shadow-md">
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold text-white">
             Pokémon Team Builder
           </h1>
+          <p className="text-sm text-gray-200">
+            Breno de Moura | Lucas Breda | Pedro Mariotti
+          </p>
         </div>
       </header>
 
-      <main className="px-16 pt-8">
-        <section className="flex flex-col gap-8">
-          <div className="grid grid-cols-3">
-            <div className="col-span-2 grid grid-cols-2 rounded-4xl bg-red-50 p-8">
-              <div className="grid grid-cols-3 gap-6">
-                {team.map((pokemon, index) => (
-                  <PokeTeamSlot
-                    key={index}
-                    pokemonName={pokemon}
-                    onAdd={() => setSelectedSlot(index)}
-                    onRemove={() => handleRemovePokemon(index)}
-                    pokemonList={pokemonList}
-                  />
-                ))}
-              </div>
-            </div>
-            <div>
-              <h2>Estatisticas</h2>
+      <main className="px-4 pt-8 md:px-16">
+        <section className="flex flex-col gap-8 lg:flex-row">
+          {/* Retângulo do Time */}
+          <div className="flex-1 rounded-4xl bg-white p-6 shadow-md">
+            <h2 className="mb-4 text-xl font-bold text-gray-800">Seu Time</h2>
+            <div className="grid grid-cols-3 gap-4">
+              {team.map((pokemon, index) => (
+                <PokeTeamSlot
+                  key={index}
+                  pokemonName={pokemon}
+                  onAdd={() => setSelectedSlot(index)}
+                  onRemove={() => handleRemovePokemon(index)}
+                  pokemonList={pokemonList}
+                />
+              ))}
+              {team.every((slot) => slot === null) && (
+                <p className="col-span-3 text-center text-gray-500">
+                  Seu time está vazio. Adicione Pokémon para começar!
+                </p>
+              )}
             </div>
           </div>
 
-          {selectedSlot !== null && (
+          {/* Retângulo das Estatísticas */}
+          <div className="flex-1 rounded-4xl bg-white p-6 shadow-md">
+            <h2 className="mb-4 text-xl font-bold text-gray-800">Estatísticas</h2>
+            {typeAdvantages && typeAdvantages.strongAgainst ? (
+              <div>
+                <h3 className="text-lg font-semibold text-green-600">Vantagens:</h3>
+                <ul className="mt-2 space-y-1">
+                  {typeAdvantages.strongAgainst.map((type: string) => (
+                    <li key={type} className="capitalize text-gray-700">
+                      {type}
+                    </li>
+                  ))}
+                </ul>
+                <h3 className="mt-4 text-lg font-semibold text-red-600">Desvantagens:</h3>
+                <ul className="mt-2 space-y-1">
+                  {typeAdvantages.weakAgainst.map((type: string) => (
+                    <li key={type} className="capitalize text-gray-700">
+                      {type}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : (
+              <p className="mt-4 text-gray-500">
+                Adicione Pokémon para calcular vantagens de tipos.
+              </p>
+            )}
+          </div>
+        </section>
+
+        {/* Barra de Busca */}
+        {selectedSlot !== null && (
+          <section className="mt-8">
             <div className="flex w-full flex-col">
-              <input
-                type="text"
-                placeholder="Pesquisar Pokémon..."
-                className="mb-4 w-full rounded border p-2"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
+              <div className="flex items-center justify-between">
+                <input
+                  type="text"
+                  placeholder="Pesquisar Pokémon..."
+                  className="mb-4 w-full rounded border p-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                <button
+                  className="ml-4 rounded bg-red-500 px-4 py-2 text-white hover:bg-red-600"
+                  onClick={() => setSelectedSlot(null)}
+                >
+                  Cancelar
+                </button>
+              </div>
               <ul className="grid grid-cols-3 gap-4">
                 {pokemonList
                   .filter((pokemon) =>
@@ -141,13 +192,21 @@ export default function Home() {
                       setmodalPokeNumber={setmodalPokeNumber}
                       setModalPokeName={setmodalPokeName}
                       poke_desc={""}
-                      // onClick={() => handleAddPokemon(pokemon.name)}
-                    ></PokeCardSearch>
+                    />
                   ))}
+                {pokemonList.filter((pokemon) =>
+                  pokemon.name
+                    .toLowerCase()
+                    .includes(searchQuery.toLowerCase()),
+                ).length === 0 && (
+                  <p className="col-span-3 text-center text-gray-500">
+                    Nenhum Pokémon encontrado.
+                  </p>
+                )}
               </ul>
             </div>
-          )}
-        </section>
+          </section>
+        )}
 
         {/* Cadeia de Evolução */}
         <section className="mt-8">
