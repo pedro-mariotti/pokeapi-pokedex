@@ -139,18 +139,20 @@ export default function Home() {
 
             <div className="h-auto">
               <div
-                className={`transition-transform duration-500 ${
-                  currentScreen === 0 ? "translate-x-0" : "-translate-x-full"
+                className={`lg:transition-transform lg:duration-500 ${
+                  currentScreen === 0
+                    ? "lg:translate-x-0"
+                    : "lg:-translate-x-full"
                 }`}
               >
                 {/* Tela 1: Defesa do Time */}
-                <div className="absolute inset-0 h-64 overflow-y-auto">
+                <div className="inset-0 h-64 overflow-y-auto lg:absolute">
                   {" "}
                   {/* Adicionado scroll vertical */}
                   <h3 className="text-lg font-semibold text-green-600">
                     Defesas
                   </h3>
-                  <ul className="mt-4 grid grid-cols-6 gap-2">
+                  <ul className="mt-4 grid grid-cols-5 gap-2 lg:grid-cols-6">
                     {typeAdvantages?.strongAgainst?.map((type: string) => (
                       <PokeType key={type} type={type} />
                     ))}
@@ -158,7 +160,7 @@ export default function Home() {
                   <h3 className="mt-4 text-lg font-semibold text-red-600">
                     Fraquezas
                   </h3>
-                  <ul className="mt-4 grid grid-cols-6 gap-2">
+                  <ul className="mt-4 grid grid-cols-5 gap-2 lg:grid-cols-6">
                     {typeAdvantages?.weakAgainst?.map((type: string) => (
                       <PokeType key={type} type={type} />
                     ))}
@@ -167,12 +169,14 @@ export default function Home() {
               </div>
 
               <div
-                className={`transition-transform duration-500 ${
-                  currentScreen === 1 ? "translate-x-0" : "-translate-x-full"
+                className={`lg:transition-transform lg:duration-500 ${
+                  currentScreen === 1
+                    ? "lg:translate-x-0"
+                    : "lg:-translate-x-full"
                 }`}
               >
                 {/* Tela 2: Cobertura */}
-                <div className="absolute inset-0">
+                <div className="inset-0">
                   <h3 className="text-lg font-semibold text-blue-600">
                     Vantagens
                   </h3>
@@ -187,13 +191,13 @@ export default function Home() {
 
             {/* Botões de navegação */}
             <button
-              className="absolute top-1/2 left-2 -translate-y-1/2 transform rounded-full bg-gray-200 p-2 shadow hover:bg-gray-300"
+              className="absolute top-1/2 left-2 hidden -translate-y-1/2 transform rounded-full bg-gray-200 p-2 shadow hover:bg-gray-300 lg:block"
               onClick={handlePreviousScreen}
             >
               {"<"}
             </button>
             <button
-              className="absolute top-1/2 right-2 -translate-y-1/2 transform rounded-full bg-gray-200 p-2 shadow hover:bg-gray-300"
+              className="absolute top-1/2 right-2 hidden -translate-y-1/2 transform rounded-full bg-gray-200 p-2 shadow hover:bg-gray-300 lg:block"
               onClick={handleNextScreen}
             >
               {">"}
@@ -260,7 +264,7 @@ export default function Home() {
         {/* Cadeia de Evolução */}
         <section className="mt-8">
           <h2 className="mb-4 text-2xl font-bold">Cadeia de Evolução</h2>
-          <div className="flex flex-col gap-8 md:grid md:grid-cols-2">
+          <div className="flex flex-col gap-8 lg:grid lg:grid-cols-2">
             {team.map((pokemon, index) =>
               pokemon ? (
                 <PokeEvolution key={index} pokemonName={pokemon} />
