@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
 import Image from "next/image";
 import PokeType from "@/components/aux components/type";
@@ -38,10 +39,7 @@ export default function PokeTeamSlot({
           </ul>
         </div>
       ) : (
-        <button
-          className="text-2xl font-bold text-gray-500"
-          onClick={onAdd}
-        >
+        <button className="text-2xl font-bold text-gray-500" onClick={onAdd}>
           +
         </button>
       )}
