@@ -9,6 +9,8 @@ import {
 } from "@/utils/pokeapi";
 import PokeCardSearch from "../components/PokeCardSearch";
 import PokeDetailsModal from "@/components/PokeDetailsModal";
+import getBgColor from "@/components/aux components/type";
+import PokeType from "@/components/aux components/type";
 
 export default function Home() {
   const [team, setTeam] = useState<(string | null)[]>([
@@ -30,6 +32,16 @@ export default function Home() {
   const [modalPokeNumber, setmodalPokeNumber] = useState(1);
   const [modalPokeDesc, setModalPokeDesc] = useState(" ");
   const [modalPokeTypes, setModalPokeTypes] = useState([" "]);
+
+  const [currentScreen, setCurrentScreen] = useState(0); // Estado para alternar entre as telas
+
+  const handleNextScreen = () => {
+    setCurrentScreen((prev) => (prev + 1) % 2); // Alterna entre 0 e 1
+  };
+
+  const handlePreviousScreen = () => {
+    setCurrentScreen((prev) => (prev - 1 + 2) % 2); // Alterna entre 0 e 1
+  };
 
   // Busca o pokemon
   useEffect(() => {
@@ -53,6 +65,7 @@ export default function Home() {
 
       if (types.length > 0) {
         const advantages = await fetchTypeAdvantages(types);
+        console.log("Vantagens calculadas:", advantages); // Log para depuração
         setTypeAdvantages(advantages);
       } else {
         setTypeAdvantages(null);
@@ -123,32 +136,62 @@ export default function Home() {
           </div>
 
           {/* Retângulo das Estatísticas */}
-          <div className="flex-1 rounded-4xl bg-white p-6 shadow-md">
+          <div className="flex-1 rounded-4xl bg-white p-6 shadow-md relative overflow-hidden">
             <h2 className="mb-4 text-xl font-bold text-gray-800">Estatísticas</h2>
-            {typeAdvantages && typeAdvantages.strongAgainst ? (
-              <div>
-                <h3 className="text-lg font-semibold text-green-600">Vantagens:</h3>
-                <ul className="mt-2 space-y-1">
-                  {typeAdvantages.strongAgainst.map((type: string) => (
-                    <li key={type} className="capitalize text-gray-700">
-                      {type}
-                    </li>
-                  ))}
-                </ul>
-                <h3 className="mt-4 text-lg font-semibold text-red-600">Desvantagens:</h3>
-                <ul className="mt-2 space-y-1">
-                  {typeAdvantages.weakAgainst.map((type: string) => (
-                    <li key={type} className="capitalize text-gray-700">
-                      {type}
-                    </li>
-                  ))}
-                </ul>
+
+            <div className="h-auto">
+              <div
+                className={`transition-transform duration-500 ${
+                  currentScreen === 0 ? "translate-x-0" : "-translate-x-full"
+                }`}
+              >
+                {/* Tela 1: Defesa do Time */}
+                <div className="absolute inset-0 h-64 overflow-y-auto"> {/* Adicionado scroll vertical */}
+                  <h3 className="text-lg font-semibold text-green-600">Defesas</h3>
+                  <ul className="grid grid-cols-6 gap-2 mt-4">
+                    {typeAdvantages?.strongAgainst?.map((type: string) => (
+                      <PokeType key={type} type={type} />
+                    ))}
+                  </ul>
+                  <h3 className="mt-4 text-lg font-semibold text-red-600">Fraquezas</h3>
+                  <ul className="grid grid-cols-6 gap-2 mt-4">
+                    {typeAdvantages?.weakAgainst?.map((type: string) => (
+                      <PokeType key={type} type={type} />
+                    ))}
+                  </ul>
+                </div>
               </div>
-            ) : (
-              <p className="mt-4 text-gray-500">
-                Adicione Pokémon para calcular vantagens de tipos.
-              </p>
-            )}
+
+              <div
+                className={`transition-transform duration-500 ${
+                  currentScreen === 1 ? "translate-x-0" : "-translate-x-full"
+                }`}
+              >
+                {/* Tela 2: Cobertura */}
+                <div className="absolute inset-0">
+                  <h3 className="text-lg font-semibold text-blue-600">Vantagens</h3>
+                  <ul className="grid grid-cols-6 gap-2 mt-4">
+                    {typeAdvantages?.strongAgainst?.map((type: string) => (
+                      <PokeType key={type} type={type} />
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            {/* Botões de navegação */}
+            <button
+              className="absolute top-1/2 left-2 transform -translate-y-1/2 bg-gray-200 p-2 rounded-full shadow hover:bg-gray-300"
+              onClick={handlePreviousScreen}
+            >
+              {"<"}
+            </button>
+            <button
+              className="absolute top-1/2 right-2 transform -translate-y-1/2 bg-gray-200 p-2 rounded-full shadow hover:bg-gray-300"
+              onClick={handleNextScreen}
+            >
+              {">"}
+            </button>
           </div>
         </section>
 

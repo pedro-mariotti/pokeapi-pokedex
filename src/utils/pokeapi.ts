@@ -28,35 +28,39 @@ export const fetchPokemonSpecies = async (id: number) => {
   return data;
 };
 
-export async function fetchTypeAdvantages(types: string[]) {
-  const weaknesses = new Set<string>();
-  const strengths = new Set<string>();
-
-  for (const type of types) {
-    const response = await fetch(`https://pokeapi.co/api/v2/type/${type}`);
-    const data = await response.json();
-
-    // Adiciona fraquezas (double_damage_from)
-    data.damage_relations.double_damage_from.forEach((t: any) =>
-      weaknesses.add(t.name),
-    );
-
-    // Adiciona vantagens (double_damage_to)
-    data.damage_relations.double_damage_to.forEach((t: any) =>
-      strengths.add(t.name),
-    );
+export async function fetchTypeAdvantages(types: string[]): Promise<any> {
+  if (types.length === 0) {
+    return { strongAgainst: [], weakAgainst: [] };
   }
 
-  // Remove tipos que são tanto fraquezas quanto vantagens
-  strengths.forEach((type) => {
-    if (weaknesses.has(type)) {
-      weaknesses.delete(type);
-      strengths.delete(type);
+  const typeChart: Record<string, { double_damage_from: string[]; double_damage_to: string[] }> = {};
+
+  // Busca os dados de cada tipo na PokeAPI
+  for (const type of types) {
+    const response = await fetch(`https://pokeapi.co/api/v2/type/${type}`);
+    if (!response.ok) {
+      throw new Error(`Erro ao buscar dados do tipo ${type}`);
     }
+    const data = await response.json();
+    typeChart[type] = {
+      double_damage_from: data.damage_relations.double_damage_from.map((t: any) => t.name),
+      double_damage_to: data.damage_relations.double_damage_to.map((t: any) => t.name),
+    };
+  }
+
+  const advantages = {
+    strongAgainst: new Set<string>(),
+    weakAgainst: new Set<string>(),
+  };
+
+  // Calcula vantagens e desvantagens
+  Object.values(typeChart).forEach((relations) => {
+    relations.double_damage_to.forEach((adv) => advantages.strongAgainst.add(adv));
+    relations.double_damage_from.forEach((disadv) => advantages.weakAgainst.add(disadv));
   });
 
   return {
-    weaknesses: Array.from(weaknesses),
-    strengths: Array.from(strengths),
+    strongAgainst: Array.from(advantages.strongAgainst),
+    weakAgainst: Array.from(advantages.weakAgainst),
   };
 }
