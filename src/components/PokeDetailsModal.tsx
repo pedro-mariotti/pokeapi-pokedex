@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import PokeType from "./aux components/type";
 import CloseIcon from "../../public/material-symbols--close-rounded.svg";
 
@@ -13,7 +13,30 @@ export default function PokeDetailsModal(props: {
   poke_types: Array<string>;
   poke_desc: string;
 }) {
-  console.log("POKEIMAGE " + props.poke_image);
+  const [description, setDescription] = useState<string>(""); // Estado para a descrição
+
+  // Função para buscar a descrição do Pokémon
+  const fetchDescription = async (name: string) => {
+    try {
+      const response = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${name}`);
+      const data = await response.json();
+      const flavorText = data.flavor_text_entries.find(
+        (entry: any) => entry.language.name === "en"
+      );
+      setDescription(flavorText ? flavorText.flavor_text.replace(/\n|\f/g, " ") : "No description available.");
+    } catch (error) {
+      console.error("Error fetching Pokémon description:", error);
+      setDescription("Failed to load description.");
+    }
+  };
+
+  // Buscar a descrição sempre que o modal for aberto
+  useEffect(() => {
+    if (props.show_modal) {
+      fetchDescription(props.poke_name.toLowerCase());
+    }
+  }, [props.show_modal, props.poke_name]);
+
   return (
     <div
       className={`fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity duration-300 ${
@@ -48,7 +71,8 @@ export default function PokeDetailsModal(props: {
                 ))}
               </ul>
             </div>
-            <p className="text-justify">{props.poke_desc}</p>
+            {/* Exibir a descrição dinâmica */}
+            <p className="text-justify">{description || props.poke_desc}</p>
             <button
               className="rounded-3xl border-1 border-black bg-red-50 p-2"
               onClick={() => {
