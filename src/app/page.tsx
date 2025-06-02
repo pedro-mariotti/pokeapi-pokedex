@@ -99,14 +99,20 @@ export default function Home() {
         handleAddPokemon={handleAddPokemon}
       />
       <header className="bg-gradient-to-r from-red-500 to-red-700 p-6 shadow-md">
-        <div className="flex items-center justify-between">
+        <nav className="flex items-center justify-between">
           <h1 className="text-3xl font-bold text-white">
             Pokémon Team Builder
           </h1>
           <p className="text-sm text-gray-200">
             Breno de Moura | Lucas Breda | Pedro Mariotti
           </p>
-        </div>
+          <button
+            className="rounded bg-white px-4 py-2 text-red-500 hover:bg-gray-200"
+            onClick={() => (window.location.href = "/teams")}
+          >
+            Ver Times
+          </button>
+        </nav>
       </header>
 
       <main className="px-4 py-8 md:px-16">
@@ -130,6 +136,31 @@ export default function Home() {
                 </p>
               )}
             </div>
+            <button
+              className="mt-4 w-full rounded bg-red-500 px-4 py-2 text-white hover:bg-red-600"
+              onClick={async () => {
+                try {
+                  console.log(team);
+                  const response = await fetch("/api/save-team", {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ team }),
+                  });
+                  if (response.ok) {
+                    alert("Time salvo com sucesso!");
+                  } else {
+                    alert("Falha ao salvar o time.");
+                  }
+                } catch (error) {
+                  console.error("Erro ao salvar o time:", error);
+                  alert("Erro ao salvar o time.");
+                }
+              }}
+            >
+              Salvar Time
+            </button>
           </div>
 
           {/* Retângulo das Estatísticas */}
@@ -214,7 +245,7 @@ export default function Home() {
                 <input
                   type="text"
                   placeholder="Pesquisar Pokémon..."
-                  className="flex-1 rounded border p-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+                  className="flex-1 rounded border p-2 shadow-sm focus:ring-2 focus:ring-red-500 focus:outline-none"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
