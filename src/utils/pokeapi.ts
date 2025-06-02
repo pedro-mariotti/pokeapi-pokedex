@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export async function fetchPokemonList() {
   const response = await fetch("https://pokeapi.co/api/v2/pokemon?limit=1000");
   const data = await response.json();
@@ -33,7 +34,10 @@ export async function fetchTypeAdvantages(types: string[]): Promise<any> {
     return { strongAgainst: [], weakAgainst: [] };
   }
 
-  const typeChart: Record<string, { double_damage_from: string[]; double_damage_to: string[] }> = {};
+  const typeChart: Record<
+    string,
+    { double_damage_from: string[]; double_damage_to: string[] }
+  > = {};
 
   // Busca os dados de cada tipo na PokeAPI
   for (const type of types) {
@@ -43,8 +47,12 @@ export async function fetchTypeAdvantages(types: string[]): Promise<any> {
     }
     const data = await response.json();
     typeChart[type] = {
-      double_damage_from: data.damage_relations.double_damage_from.map((t: any) => t.name),
-      double_damage_to: data.damage_relations.double_damage_to.map((t: any) => t.name),
+      double_damage_from: data.damage_relations.double_damage_from.map(
+        (t: any) => t.name,
+      ),
+      double_damage_to: data.damage_relations.double_damage_to.map(
+        (t: any) => t.name,
+      ),
     };
   }
 
@@ -55,8 +63,12 @@ export async function fetchTypeAdvantages(types: string[]): Promise<any> {
 
   // Calcula vantagens e desvantagens
   Object.values(typeChart).forEach((relations) => {
-    relations.double_damage_to.forEach((adv) => advantages.strongAgainst.add(adv));
-    relations.double_damage_from.forEach((disadv) => advantages.weakAgainst.add(disadv));
+    relations.double_damage_to.forEach((adv) =>
+      advantages.strongAgainst.add(adv),
+    );
+    relations.double_damage_from.forEach((disadv) =>
+      advantages.weakAgainst.add(disadv),
+    );
   });
 
   return {
