@@ -41,7 +41,7 @@ export default function TeamPage() {
         <div className="flex items-center justify-between">
           <h1
             className="cursor-pointer text-3xl font-bold text-white"
-            onClick={() => (window.location.href = "/")}
+            onClick={() => (window.location.href = "/dashboard")}
           >
             Pokémon Teams
           </h1>
