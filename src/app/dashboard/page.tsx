@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import PokeTeamSlot from "@/components/PokeTeamSlot";
 import PokeEvolution from "@/components/PokeEvolution";
 import { fetchPokemonList, fetchTypeAdvantages } from "@/utils/pokeapi";
@@ -8,6 +9,26 @@ import PokeDetailsModal from "@/components/PokeDetailsModal";
 import PokeType from "@/components/aux components/type";
 
 export default function Home() {
+  const router = useRouter();
+
+  // Token validation logic
+  useEffect(() => {
+    const token =
+      typeof window !== "undefined" ? localStorage.getItem("token") : null;
+    // Replace this with your real validation logic (e.g., JWT decode/verify)
+    const isValidToken = !!token && token.length > 10; // Example: token must exist and be >10 chars
+
+    if (!isValidToken) {
+      router.replace("/");
+    }
+  }, [router]);
+
+  // Log out handler
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    router.replace("/");
+  };
+
   const [team, setTeam] = useState<(string | null)[]>([
     null,
     null,
@@ -28,17 +49,16 @@ export default function Home() {
   const [modalPokeDesc, setModalPokeDesc] = useState(" ");
   const [modalPokeTypes, setModalPokeTypes] = useState([" "]);
 
-  const [currentScreen, setCurrentScreen] = useState(0); // Estado para alternar entre as telas
+  const [currentScreen, setCurrentScreen] = useState(0);
 
   const handleNextScreen = () => {
-    setCurrentScreen((prev) => (prev + 1) % 2); // Alterna entre 0 e 1
+    setCurrentScreen((prev) => (prev + 1) % 2);
   };
 
   const handlePreviousScreen = () => {
-    setCurrentScreen((prev) => (prev - 1 + 2) % 2); // Alterna entre 0 e 1
+    setCurrentScreen((prev) => (prev - 1 + 2) % 2);
   };
 
-  // Busca o pokemon
   useEffect(() => {
     const loadPokemonList = async () => {
       const list = await fetchPokemonList();
@@ -47,20 +67,18 @@ export default function Home() {
     loadPokemonList();
   }, []);
 
-  // Calcula as vantagens e fraquezas do time
   useEffect(() => {
     const calculateAdvantages = async () => {
       const types = team
-        .filter(Boolean) // Remove slots vazios
+        .filter(Boolean)
         .map((pokemonName) => {
           const pokemon = pokemonList.find((p) => p.name === pokemonName);
           return pokemon?.types || [];
         })
-        .flat(); // Combina todos os tipos em um único array
+        .flat();
 
       if (types.length > 0) {
         const advantages = await fetchTypeAdvantages(types);
-        console.log("Vantagens calculadas:", advantages); // Log para depuração
         setTypeAdvantages(advantages);
       } else {
         setTypeAdvantages(null);
@@ -125,9 +143,17 @@ export default function Home() {
           <h1 className="text-3xl font-bold text-white">
             Pokémon Team Builder
           </h1>
-          <p className="text-sm text-gray-200">
-            Breno de Moura | Lucas Breda | Pedro Mariotti
-          </p>
+          <div className="flex items-center gap-4">
+            <p className="text-sm text-gray-200">
+              Breno de Moura | Lucas Breda | Pedro Mariotti
+            </p>
+            <button
+              className="ml-4 rounded bg-white px-4 py-2 font-semibold text-red-600 hover:bg-gray-100"
+              onClick={handleLogout}
+            >
+              Log Out
+            </button>
+          </div>
         </div>
       </header>
 
@@ -191,8 +217,6 @@ export default function Home() {
               >
                 {/* Tela 1: Defesa do Time */}
                 <div className="inset-0 h-64 overflow-y-auto lg:absolute">
-                  {" "}
-                  {/* Adicionado scroll vertical */}
                   <h3 className="text-lg font-semibold text-green-600">
                     Defesas
                   </h3>

@@ -7,7 +7,6 @@ export default function RegisterPage() {
     email: "",
     password: "",
   });
-
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
@@ -22,7 +21,7 @@ export default function RegisterPage() {
     setSuccess("");
 
     try {
-      const response = await fetch("/api/register", {
+      const response = await fetch("http://localhost:1337/api/users/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -43,7 +42,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100">
+    <div className="flex min-h-screen items-center justify-center bg-[#eeafaf]">
       <div className="w-full max-w-md rounded-lg bg-white p-8 shadow-md">
         <h1 className="mb-6 text-center text-2xl font-bold text-gray-800">
           Register
@@ -113,6 +112,13 @@ export default function RegisterPage() {
         {success && (
           <p className="mt-4 text-center text-sm text-green-600">{success}</p>
         )}
+        <button
+          type="button"
+          onClick={() => (window.location.href = "/")}
+          className="mt-4 w-full rounded-md bg-gray-200 px-4 py-2 text-gray-800 hover:bg-gray-300"
+        >
+          Back to Login
+        </button>
       </div>
     </div>
   );

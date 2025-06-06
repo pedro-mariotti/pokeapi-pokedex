@@ -1,24 +1,28 @@
 "use client";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
+import eeveePng from "../../public/pokemon-eevee.png";
+import pikachuPng from "../../public/pokemon-pikachu.png";
+import teamBuilderText from "../../public/Pokemon-team-builder-text.png";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState<string>("");
+  const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   const handleLogin = async (event: React.FormEvent) => {
     event.preventDefault();
     setLoading(true);
     setError(null);
 
-    // Placeholder backend connection
     try {
-      const response = await fetch("/api/login", {
+      const response = await fetch("http://localhost:1337/api/users/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ username, password }),
       });
 
       if (!response.ok) {
@@ -26,8 +30,13 @@ export default function LoginPage() {
       }
 
       const data = await response.json();
+      // Store token in localStorage
+      if (data.token) {
+        localStorage.setItem("token", data.token);
+      }
       console.log("Login successful:", data);
-      alert("Login successful!");
+      // Redirect to dashboard
+      router.push("/dashboard");
     } catch (err: any) {
       setError(err.message || "An error occurred");
     } finally {
@@ -36,13 +45,13 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center bg-gray-50">
+    <div className="relative flex min-h-screen items-center justify-center bg-[#eeafaf]">
       {/* Left Pokémon Image */}
       <div className="absolute top-0 left-0 flex h-full w-1/4 items-center justify-center">
         <Image
-          width={200}
-          height={200}
-          src="/images/pokemon-left.png"
+          width={400}
+          height={400}
+          src={pikachuPng}
           alt="Pokemon Left"
           className="max-h-full object-contain"
         />
@@ -51,9 +60,9 @@ export default function LoginPage() {
       {/* Right Pokémon Image */}
       <div className="absolute top-0 right-0 flex h-full w-1/4 items-center justify-center">
         <Image
-          width={200}
-          height={200}
-          src="/images/pokemon-right.png"
+          width={400}
+          height={400}
+          src={eeveePng}
           alt="Pokemon Right"
           className="max-h-full object-contain"
         />
@@ -61,6 +70,12 @@ export default function LoginPage() {
 
       {/* Login Form */}
       <div className="z-10 w-full max-w-md rounded-lg bg-white p-6 shadow-md">
+        <Image
+          width={400}
+          height={400}
+          src={teamBuilderText}
+          alt="Pokemon Team Builder"
+        />
         <h1 className="mb-6 text-2xl font-bold text-gray-800">Login</h1>
         <form onSubmit={handleLogin}>
           <div className="mb-4">
@@ -68,14 +83,14 @@ export default function LoginPage() {
               htmlFor="email"
               className="block text-sm font-medium text-gray-700"
             >
-              Email
+              Username
             </label>
             <input
-              type="email"
-              id="email"
+              type="text"
+              id="username"
               className="mt-1 w-full rounded border p-2 shadow-sm focus:ring-2 focus:ring-red-500 focus:outline-none"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               required
             />
           </div>
@@ -104,6 +119,14 @@ export default function LoginPage() {
             {loading ? "Logging in..." : "Login"}
           </button>
         </form>
+        <div className="mt-4 flex justify-center">
+          <a
+            href="/register"
+            className="w-full rounded bg-gray-200 px-4 py-2 text-center text-gray-800 transition-colors hover:bg-gray-300"
+          >
+            Register
+          </a>
+        </div>
       </div>
     </div>
   );
