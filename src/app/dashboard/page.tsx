@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import { useState, useEffect, use } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import PokeTeamSlot from "@/components/PokeTeamSlot";
 import PokeEvolution from "@/components/PokeEvolution";
@@ -135,7 +136,7 @@ export default function Home() {
         throw new Error("Erro ao salvar o time.");
       }
 
-      alert(`Time "${savedTeam.name}" salvo com sucesso!`);
+      alert(`Time "${savedTeam.teamName}" salvo com sucesso!`);
     } catch (error) {
       alert("Falha ao salvar o time. Tente novamente.");
       console.error(error);
@@ -206,7 +207,6 @@ export default function Home() {
                   pokemonName={pokemon}
                   onAdd={() => setSelectedSlot(index)}
                   onRemove={() => handleRemovePokemon(index)}
-                  pokemonList={pokemonList}
                 />
               ))}
               {team.every((slot) => slot === null) && (
