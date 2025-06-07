@@ -6,19 +6,23 @@ import SavedPokeTeamSlot from "@/components/SavedPokeTeamSlot";
 export default function TeamPage() {
   const [teams, setTeams] = useState<any[]>([]);
 
-  // Fetch teams from backend
   useEffect(() => {
+    const userId = localStorage.getItem("userId");
+    if (!userId) {
+      window.location.href = "/";
+      return;
+    }
+
     const fetchTeams = async () => {
       try {
         const response = await fetch(
-          `http://localhost:1337/api/poketeams/user/${localStorage.getItem("userId")}`,
+          `https://pokedex-backend-woad.vercel.app/api/poketeams/user/${userId}`,
         );
         if (response.ok) {
           const data = await response.json();
-          // Assuming each team object has a 'pokemonNames' array property
-          // and optionally a 'teamName'
           const formattedTeams = Array.isArray(data)
             ? data.map((teamObj: any) => ({
+                teamId: teamObj._id || teamObj.teamId, // Ensure teamId is present
                 teamName: teamObj.teamName || "",
                 pokemonNames: teamObj.pokemonNames || [],
               }))
@@ -34,6 +38,27 @@ export default function TeamPage() {
     };
     fetchTeams();
   }, []);
+
+  const handleDeleteTeam = async (teamId: string) => {
+    console.log("Deleting team with ID:", teamId);
+    if (!teamId) return;
+    try {
+      const response = await fetch(
+        `https://pokedex-backend-woad.vercel.app/api/poketeams/${teamId}`,
+        {
+          method: "DELETE",
+        },
+      );
+      if (response.ok) {
+        setTeams((prev) => prev.filter((team) => team.teamId !== teamId));
+      } else {
+        const errorText = await response.text();
+        console.error("Failed to delete team:", errorText);
+      }
+    } catch (error) {
+      console.error("Error deleting team:", error);
+    }
+  };
 
   return (
     <div className="max-h-max min-h-screen w-screen bg-gray-50 font-sans">
@@ -54,12 +79,20 @@ export default function TeamPage() {
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {teams.map((team, teamIndex) => (
               <div
-                key={teamIndex}
+                key={team.teamId || teamIndex}
                 className="rounded-lg bg-white p-4 shadow-md"
               >
-                <h3 className="mb-2 text-lg font-semibold text-gray-800">
-                  {team.teamName || `Team ${teamIndex + 1}`}
-                </h3>
+                <div className="mb-2 flex items-center justify-between">
+                  <h3 className="text-lg font-semibold text-gray-800">
+                    {team.teamName || `Team ${teamIndex + 1}`}
+                  </h3>
+                  <button
+                    className="ml-2 rounded bg-red-500 px-3 py-1 text-sm font-semibold text-white hover:bg-red-700"
+                    onClick={() => handleDeleteTeam(team.teamId)}
+                  >
+                    Delete
+                  </button>
+                </div>
                 <div className="grid grid-cols-3 gap-4">
                   {team.pokemonNames.map(
                     (pokemonName: string, slotIndex: number) =>
