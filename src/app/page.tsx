@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -30,9 +31,12 @@ export default function LoginPage() {
       }
 
       const data = await response.json();
-      // Store token in localStorage
+      // Store token and userId in localStorage
       if (data.token) {
         localStorage.setItem("token", data.token);
+      }
+      if (data.userId) {
+        localStorage.setItem("userId", data.userId);
       }
       console.log("Login successful:", data);
       // Redirect to dashboard

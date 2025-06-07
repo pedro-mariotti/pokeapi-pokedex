@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 import PokeTeamSlot from "@/components/PokeTeamSlot";
 import PokeEvolution from "@/components/PokeEvolution";
@@ -104,13 +104,9 @@ export default function Home() {
 
   const [teamName, setTeamName] = useState<string>("");
 
-  function handleSetTeamName(value: string): void {
-    setTeamName(value);
-  }
-
-  function handleSaveTeam(
+  async function handleSaveTeam(
     event: React.MouseEvent<HTMLButtonElement, MouseEvent>,
-  ): void {
+  ): Promise<void> {
     event.preventDefault();
     if (team.every((slot) => slot === null)) {
       alert("Seu time está vazio. Adicione Pokémon antes de salvar!");
@@ -118,12 +114,32 @@ export default function Home() {
     }
 
     const savedTeam = {
-      name: teamName || "Time Sem Nome",
-      members: team.filter((slot) => slot !== null),
+      UserId: localStorage.getItem("userId"),
+      teamName: teamName || "Time Sem Nome",
+      pokemonNames: team.filter((slot) => slot !== null),
     };
 
-    console.log("Time salvo:", savedTeam);
-    alert(`Time "${savedTeam.name}" salvo com sucesso!`);
+    try {
+      const token =
+        typeof window !== "undefined" ? localStorage.getItem("token") : null;
+      const response = await fetch("http://localhost:1337/api/poketeams", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify(savedTeam),
+      });
+
+      if (!response.ok) {
+        throw new Error("Erro ao salvar o time.");
+      }
+
+      alert(`Time "${savedTeam.name}" salvo com sucesso!`);
+    } catch (error) {
+      alert("Falha ao salvar o time. Tente novamente.");
+      console.error(error);
+    }
   }
 
   return (
@@ -139,11 +155,17 @@ export default function Home() {
         handleAddPokemon={handleAddPokemon}
       />
       <header className="bg-gradient-to-r from-red-500 to-red-700 p-6 shadow-md">
-        <div className="flex items-center justify-between">
+        <nav className="flex items-center justify-between">
           <h1 className="text-3xl font-bold text-white">
             Pokémon Team Builder
           </h1>
           <div className="flex items-center gap-4">
+            <button
+              className="rounded bg-white px-4 py-2 font-semibold text-red-600 hover:bg-gray-100"
+              onClick={() => router.push("/teams")}
+            >
+              Ver Times
+            </button>
             <p className="text-sm text-gray-200">
               Breno de Moura | Lucas Breda | Pedro Mariotti
             </p>
@@ -154,7 +176,7 @@ export default function Home() {
               Log Out
             </button>
           </div>
-        </div>
+        </nav>
       </header>
 
       <main className="px-4 py-8 md:px-16">

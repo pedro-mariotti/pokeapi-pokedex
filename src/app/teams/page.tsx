@@ -1,32 +1,32 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { useState, useEffect } from "react";
-import PokeTeamSlot from "@/components/PokeTeamSlot";
-import { fetchPokemonList } from "@/utils/pokeapi";
+import SavedPokeTeamSlot from "@/components/SavedPokeTeamSlot";
 
 export default function TeamPage() {
-  const [pokemonList, setPokemonList] = useState<any[]>([]);
-  const [teams, setTeams] = useState<any[]>([]); // State to store fetched teams
-
-  // Fetch Pokémon list
-  useEffect(() => {
-    const loadPokemonList = async () => {
-      const list = await fetchPokemonList();
-      setPokemonList(list);
-    };
-    loadPokemonList();
-  }, []);
+  const [teams, setTeams] = useState<any[]>([]);
 
   // Fetch teams from backend
   useEffect(() => {
     const fetchTeams = async () => {
       try {
-        const response = await fetch("/api/get-teams");
+        const response = await fetch(
+          `http://localhost:1337/api/poketeams/user/${localStorage.getItem("userId")}`,
+        );
         if (response.ok) {
           const data = await response.json();
-          setTeams(data.teams); // Assuming the response has a `teams` array
+          // Assuming each team object has a 'pokemonNames' array property
+          // and optionally a 'teamName'
+          const formattedTeams = Array.isArray(data)
+            ? data.map((teamObj: any) => ({
+                teamName: teamObj.teamName || "",
+                pokemonNames: teamObj.pokemonNames || [],
+              }))
+            : [];
+          setTeams(formattedTeams);
         } else {
-          console.error("Failed to fetch teams");
+          const errorText = await response.text();
+          console.error("Failed to fetch teams:", errorText);
         }
       } catch (error) {
         console.error("Error fetching teams:", error);
@@ -58,18 +58,17 @@ export default function TeamPage() {
                 className="rounded-lg bg-white p-4 shadow-md"
               >
                 <h3 className="mb-2 text-lg font-semibold text-gray-800">
-                  Team {teamIndex + 1}
+                  {team.teamName || `Team ${teamIndex + 1}`}
                 </h3>
                 <div className="grid grid-cols-3 gap-4">
-                  {team.map((pokemonName: string | null, slotIndex: number) => (
-                    <PokeTeamSlot
-                      key={slotIndex}
-                      pokemonName={pokemonName}
-                      onAdd={() => {}}
-                      onRemove={() => {}}
-                      pokemonList={pokemonList}
-                    />
-                  ))}
+                  {team.pokemonNames.map(
+                    (pokemonName: string, slotIndex: number) =>
+                      pokemonName ? (
+                        <SavedPokeTeamSlot key={slotIndex} name={pokemonName} />
+                      ) : (
+                        <div key={slotIndex} />
+                      ),
+                  )}
                 </div>
               </div>
             ))}
