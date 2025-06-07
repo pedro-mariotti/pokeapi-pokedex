@@ -123,14 +123,17 @@ export default function Home() {
     try {
       const token =
         typeof window !== "undefined" ? localStorage.getItem("token") : null;
-      const response = await fetch("http://localhost:1337/api/poketeams", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      const response = await fetch(
+        "https://pokedex-backend-woad.vercel.app/api/poketeams",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify(savedTeam),
         },
-        body: JSON.stringify(savedTeam),
-      });
+      );
 
       if (!response.ok) {
         throw new Error("Erro ao salvar o time.");

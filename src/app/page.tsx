@@ -20,11 +20,14 @@ export default function LoginPage() {
     setError(null);
 
     try {
-      const response = await fetch("http://localhost:1337/api/users/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
-      });
+      const response = await fetch(
+        "https://pokedex-backend-woad.vercel.app/api/users/login",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password }),
+        },
+      );
 
       if (!response.ok) {
         throw new Error("Invalid email or password");
