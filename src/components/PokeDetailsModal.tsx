@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { Dispatch, SetStateAction } from "react";
 import PokeType from "./aux components/type";
 import CloseIcon from "../../public/material-symbols--close-rounded.svg";
 
@@ -32,7 +32,7 @@ export default function PokeDetailsModal(props: {
           <Image
             src={props.poke_image}
             alt="pokemon image"
-            className="w-48 md:w-64 object-contain" // Adicionado object-contain para corrigir a proporção da imagem
+            className="w-48 object-contain md:w-64" // Adicionado object-contain para corrigir a proporção da imagem
             width={96}
             height={96}
           />
