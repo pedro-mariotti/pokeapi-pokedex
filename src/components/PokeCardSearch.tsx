@@ -50,7 +50,11 @@ export default function PokeCardSearch(props: {
     >
       <Image
         alt="pokemon image"
-        src={props.poke_image && props.poke_image.trim() !== "" ? props.poke_image : "/placeholder.png"}
+        src={
+          props.poke_image && props.poke_image.trim() !== ""
+            ? props.poke_image
+            : "/placeholder.png"
+        }
         className="h-20 w-20" // Aumentei o tamanho da imagem
         width={140}
         height={140}
