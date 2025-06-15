@@ -90,6 +90,30 @@ const compareTeams = async (teamA: Team, teamB: Team) => {
   let teamAScore = 0;
   let teamBScore = 0;
 
+  // For detailed breakdown
+  const details: {
+    teamA: { name: string; types: string[] }[];
+    teamB: { name: string; types: string[] }[];
+    effectiveness: {
+      attacker: string;
+      attackerTypes: string[];
+      defender: string;
+      defenderTypes: string[];
+      result: string;
+      team: "A" | "B";
+    }[];
+  } = {
+    teamA: teamAData.map((p) => ({
+      name: p.name,
+      types: p.types.map((t) => t.name),
+    })),
+    teamB: teamBData.map((p) => ({
+      name: p.name,
+      types: p.types.map((t) => t.name),
+    })),
+    effectiveness: [],
+  };
+
   // Compare each pokemon in A to each in B
   for (const pokeA of teamAData) {
     for (const pokeB of teamBData) {
@@ -101,6 +125,14 @@ const compareTeams = async (teamA: Team, teamB: Team) => {
           )
         ) {
           teamAScore++;
+          details.effectiveness.push({
+            attacker: pokeA.name,
+            attackerTypes: pokeA.types.map((t) => t.name),
+            defender: pokeB.name,
+            defenderTypes: pokeB.types.map((t) => t.name),
+            result: "super effective (A)",
+            team: "A",
+          });
         }
         if (
           typeChart[typeA.name]?.double_damage_from.some((t) =>
@@ -108,6 +140,14 @@ const compareTeams = async (teamA: Team, teamB: Team) => {
           )
         ) {
           teamBScore++;
+          details.effectiveness.push({
+            attacker: pokeB.name,
+            attackerTypes: pokeB.types.map((t) => t.name),
+            defender: pokeA.name,
+            defenderTypes: pokeA.types.map((t) => t.name),
+            result: "super effective (B)",
+            team: "B",
+          });
         }
       }
       // For each type in pokeB, check if it is strong against any type in pokeA
@@ -118,6 +158,14 @@ const compareTeams = async (teamA: Team, teamB: Team) => {
           )
         ) {
           teamBScore++;
+          details.effectiveness.push({
+            attacker: pokeB.name,
+            attackerTypes: pokeB.types.map((t) => t.name),
+            defender: pokeA.name,
+            defenderTypes: pokeA.types.map((t) => t.name),
+            result: "super effective (B)",
+            team: "B",
+          });
         }
         if (
           typeChart[typeB.name]?.double_damage_from.some((t) =>
@@ -125,6 +173,14 @@ const compareTeams = async (teamA: Team, teamB: Team) => {
           )
         ) {
           teamAScore++;
+          details.effectiveness.push({
+            attacker: pokeA.name,
+            attackerTypes: pokeA.types.map((t) => t.name),
+            defender: pokeB.name,
+            defenderTypes: pokeB.types.map((t) => t.name),
+            result: "super effective (A)",
+            team: "A",
+          });
         }
       }
     }
@@ -144,6 +200,7 @@ const compareTeams = async (teamA: Team, teamB: Team) => {
     winner,
     teamAData,
     teamBData,
+    details,
   };
 };
 
@@ -158,6 +215,20 @@ export default function TeamPage() {
     teamAScore: number;
     teamBScore: number;
     winner: "A" | "B" | "draw";
+    teamAData?: PokemonData[];
+    teamBData?: PokemonData[];
+    details?: {
+      teamA: { name: string; types: string[] }[];
+      teamB: { name: string; types: string[] }[];
+      effectiveness: {
+        attacker: string;
+        attackerTypes: string[];
+        defender: string;
+        defenderTypes: string[];
+        result: string;
+        team: "A" | "B";
+      }[];
+    };
   } | null>(null);
   const [loadingComparison, setLoadingComparison] = useState(false);
   const router = useRouter();
@@ -341,6 +412,106 @@ export default function TeamPage() {
                         ? `Vencedor: ${selectedTeams[0].teamName || "Time 1"}`
                         : `Vencedor: ${selectedTeams[1].teamName || "Time 2"}`}
                   </div>
+
+                  {/* --- Detailed Comparison Breakdown --- */}
+                  {comparisonResult.details && (
+                    <div className="mt-6 text-left">
+                      <h5 className="mb-2 text-base font-semibold text-gray-700">
+                        Tipos dos Pokémons de cada time
+                      </h5>
+                      <div className="flex flex-col gap-4 md:flex-row">
+                        <div className="flex-1">
+                          <div className="mb-1 font-bold text-blue-700">
+                            {selectedTeams[0].teamName || "Time 1"}
+                          </div>
+                          <ul className="text-sm">
+                            {comparisonResult.details.teamA.map((poke) => (
+                              <li key={poke.name}>
+                                <span className="font-semibold">
+                                  {poke.name}
+                                </span>
+                                :{" "}
+                                {poke.types.map((type) => (
+                                  <span
+                                    key={type}
+                                    className="mr-1 inline-block rounded bg-blue-200 px-2 py-0.5 text-xs text-blue-900"
+                                  >
+                                    {type}
+                                  </span>
+                                ))}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                        <div className="flex-1">
+                          <div className="mb-1 font-bold text-green-700">
+                            {selectedTeams[1].teamName || "Time 2"}
+                          </div>
+                          <ul className="text-sm">
+                            {comparisonResult.details.teamB.map((poke) => (
+                              <li key={poke.name}>
+                                <span className="font-semibold">
+                                  {poke.name}
+                                </span>
+                                :{" "}
+                                {poke.types.map((type) => (
+                                  <span
+                                    key={type}
+                                    className="mr-1 inline-block rounded bg-green-200 px-2 py-0.5 text-xs text-green-900"
+                                  >
+                                    {type}
+                                  </span>
+                                ))}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+
+                      <h5 className="mt-4 mb-2 text-base font-semibold text-gray-700">
+                        Detalhes dos cálculos de efetividade
+                      </h5>
+                      <div className="max-h-40 overflow-y-auto rounded border bg-white p-2 text-xs">
+                        {comparisonResult.details.effectiveness.length ===
+                          0 && (
+                          <div className="text-gray-500">
+                            Nenhuma vantagem de tipo encontrada.
+                          </div>
+                        )}
+                        {comparisonResult.details.effectiveness.map(
+                          (eff, idx) => (
+                            <div key={idx} className="mb-1">
+                              <span
+                                className={
+                                  eff.team === "A"
+                                    ? "text-blue-700"
+                                    : "text-green-700"
+                                }
+                              >
+                                <b>{eff.attacker}</b> (
+                                {eff.attackerTypes.join(", ")})
+                              </span>{" "}
+                              foi super efetivo contra{" "}
+                              <span
+                                className={
+                                  eff.team === "A"
+                                    ? "text-green-700"
+                                    : "text-blue-700"
+                                }
+                              >
+                                <b>{eff.defender}</b> (
+                                {eff.defenderTypes.join(", ")})
+                              </span>{" "}
+                              <span className="text-gray-500 italic">
+                                [{eff.result}]
+                              </span>
+                            </div>
+                          ),
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  {/* --- End Detailed Comparison Breakdown --- */}
                 </div>
               )}
             </div>
