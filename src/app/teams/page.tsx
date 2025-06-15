@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import { useState, useEffect } from "react";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import SavedPokeTeamSlot from "@/components/SavedPokeTeamSlot";
 
 export default function TeamPage() {
@@ -10,19 +12,26 @@ export default function TeamPage() {
     null,
     null,
   ]);
+  const router = useRouter();
 
   useEffect(() => {
+    // Verifica se está no ambiente do navegador
+    if (typeof window === "undefined") return;
+
     const userId = localStorage.getItem("userId");
+
+    // Redireciona se não houver usuário
     if (!userId) {
-      window.location.href = "/";
+      router.replace("/");
       return;
     }
 
     const fetchTeams = async () => {
       try {
         const response = await fetch(
-          `https://pokedex-backend-woad.vercel.app/api/poketeams/user/${userId}`,
+          `http://localhost:1337/api/poketeams/user/${userId}`,
         );
+
         if (response.ok) {
           const data = await response.json();
           const formattedTeams = Array.isArray(data)
@@ -33,6 +42,7 @@ export default function TeamPage() {
               }))
             : [];
           setTeams(formattedTeams);
+          console.log("Fetched teams:", formattedTeams);
         } else {
           const errorText = await response.text();
           console.error("Failed to fetch teams:", errorText);
@@ -41,22 +51,21 @@ export default function TeamPage() {
         console.error("Error fetching teams:", error);
       }
     };
+
     fetchTeams();
-  }, []);
+  }, [router]);
 
   const handleDeleteTeam = async (teamId: string) => {
     if (!teamId) return;
     try {
       const response = await fetch(
         `https://pokedex-backend-woad.vercel.app/api/poketeams/${teamId}`,
-        {
-          method: "DELETE",
-        },
+        { method: "DELETE" },
       );
       if (response.ok) {
         setTeams((prev) => prev.filter((team) => team.teamId !== teamId));
         setSelectedTeams((prev) =>
-          prev.map((team) => (team && team.teamId === teamId ? null : team)),
+          prev.map((team) => (team?.teamId === teamId ? null : team)),
         );
       } else {
         const errorText = await response.text();
@@ -67,25 +76,22 @@ export default function TeamPage() {
     }
   };
 
-  // Handler for "Comparar times"
   const handleCompareTeams = () => {
     setCompareMode((prev) => {
-      if (prev) setSelectedTeams([null, null]);
+      if (prev) {
+        setSelectedTeams([null, null]);
+      }
       return !prev;
     });
   };
 
-  // Handler for selecting a team for comparison
   const handleSelectTeam = (team: any) => {
+    console.log("Selected teams:", selectedTeams);
     setSelectedTeams((prev) => {
-      // If both slots are empty, insert in the first
       if (!prev[0]) return [team, null];
-      // If first is filled and second is empty, insert in the second (if not same team)
       if (!prev[1] && prev[0].teamId !== team.teamId) return [prev[0], team];
-      // If clicking the same team, remove it from the slot
       if (prev[0]?.teamId === team.teamId) return [null, prev[1]];
       if (prev[1]?.teamId === team.teamId) return [prev[0], null];
-      // If both are filled, replace the first with the new selection
       return [team, prev[1]];
     });
   };
@@ -96,7 +102,7 @@ export default function TeamPage() {
         <div className="flex items-center justify-between">
           <h1
             className="cursor-pointer text-3xl font-bold text-white"
-            onClick={() => (window.location.href = "/dashboard")}
+            onClick={() => router.push("/dashboard")}
           >
             Pokémon Teams
           </h1>
@@ -117,14 +123,12 @@ export default function TeamPage() {
             </button>
           </div>
 
-          {/* Comparison View */}
           {compareMode && (
             <div className="mb-8 flex flex-col gap-4 md:flex-row">
               {[0, 1].map((idx) => (
                 <div
                   key={idx}
                   className="flex min-h-[250px] flex-1 flex-col items-center justify-center rounded-lg border-2 border-blue-400 bg-white p-6 shadow-lg"
-                  style={{ minHeight: 250 }}
                 >
                   {selectedTeams[idx] ? (
                     <>
@@ -138,7 +142,6 @@ export default function TeamPage() {
                               <SavedPokeTeamSlot
                                 key={slotIndex}
                                 name={pokemonName}
-                                compareMode={compareMode}
                               />
                             ) : (
                               <div key={slotIndex} />
@@ -168,15 +171,17 @@ export default function TeamPage() {
                     {compareMode && (
                       <button
                         className={`mr-2 rounded px-3 py-1 text-sm font-semibold text-white ${
-                          selectedTeams[0]?.teamId === team.teamId ||
-                          selectedTeams[1]?.teamId === team.teamId
+                          selectedTeams
+                            .filter(Boolean)
+                            .some((t) => t.teamId === team.teamId)
                             ? "bg-green-700"
                             : "bg-green-500 hover:bg-green-700"
                         }`}
                         onClick={() => handleSelectTeam(team)}
                       >
-                        {selectedTeams[0]?.teamId === team.teamId ||
-                        selectedTeams[1]?.teamId === team.teamId
+                        {selectedTeams
+                          .filter(Boolean)
+                          .some((t) => t.teamId === team.teamId)
                           ? "Selecionado"
                           : "Selecionar time"}
                       </button>
@@ -193,11 +198,7 @@ export default function TeamPage() {
                   {team.pokemonNames.map(
                     (pokemonName: string, slotIndex: number) =>
                       pokemonName ? (
-                        <SavedPokeTeamSlot
-                          key={slotIndex}
-                          name={pokemonName}
-                          compareMode={compareMode}
-                        />
+                        <SavedPokeTeamSlot key={slotIndex} name={pokemonName} />
                       ) : (
                         <div key={slotIndex} />
                       ),
