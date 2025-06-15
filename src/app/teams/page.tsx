@@ -1,10 +1,26 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import SavedPokeTeamSlot from "@/components/SavedPokeTeamSlot";
 
 export default function TeamPage() {
-  const [teams, setTeams] = useState<any[]>([]);
+  // Carrega os times do localStorage ao iniciar
+  const [teams, setTeams] = useState(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("teams");
+      return saved ? JSON.parse(saved) : [];
+    }
+    return [];
+  });
+
+  // Salva os times no localStorage sempre que mudarem
+  useEffect(() => {
+    localStorage.setItem("teams", JSON.stringify(teams));
+  }, [teams]);
+
+  const [editingTeam, setEditingTeam] = useState<any | null>(null);
+  const [teamName, setTeamName] = useState("");
+  const [pokemons, setPokemons] = useState<string[]>([]);
 
   useEffect(() => {
     const userId = localStorage.getItem("userId");
@@ -60,6 +76,59 @@ export default function TeamPage() {
     }
   };
 
+  // Função para iniciar edição
+  const handleEditTeam = (team: any) => {
+    setEditingTeam(team);
+    setTeamName(team.teamName);
+    setPokemons(team.pokemonNames);
+  };
+
+  // Função para cancelar edição
+  const handleNewTeam = () => {
+    setEditingTeam(null);
+    setTeamName("");
+    setPokemons([]);
+  };
+
+  // Salvar time (novo ou editado)
+  const handleSaveTeam = async () => {
+    if (editingTeam) {
+      // Editando: atualiza o time na lista
+      setTeams((prev) =>
+        prev.map((t) =>
+          t.teamId === editingTeam.teamId
+            ? { ...t, teamName, pokemonNames: pokemons }
+            : t
+        )
+      );
+    } else {
+      // Novo: adiciona à lista
+      setTeams((prev) => [
+        ...prev,
+        {
+          teamId: Date.now(),
+          teamName,
+          pokemonNames: pokemons,
+        },
+      ]);
+    }
+    setEditingTeam(null);
+    setTeamName("");
+    setPokemons([]);
+  };
+
+  // Remover pokémon do time
+  const handleRemovePokemon = (index: number) => {
+    setPokemons((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  // Adicionar pokémon (exemplo simples, adapte conforme seu fluxo)
+  const handleAddPokemon = (pokemon: { name: string }) => {
+    if (pokemons.length < 6) {
+      setPokemons((prev) => [...prev, pokemon.name]);
+    }
+  };
+
   return (
     <div className="max-h-max min-h-screen w-screen bg-gray-50 font-sans">
       <header className="bg-gradient-to-r from-red-500 to-red-700 p-6 shadow-md">
@@ -77,6 +146,67 @@ export default function TeamPage() {
         <section>
           <h2 className="mb-4 text-2xl font-bold text-gray-800">Teams</h2>
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {/* Formulário de criar/editar time */}
+            <div className="mb-6 rounded border p-4 shadow">
+              <h2 className="mb-2 text-xl font-bold">
+                { "Editar Time" }
+              </h2>
+              <input
+                className="mb-2 w-full rounded border px-2 py-1"
+                placeholder="Nome do time"
+                value={teamName}
+                onChange={(e) => setTeamName(e.target.value)}
+              />
+              <div className="mb-2">
+                <span className="font-semibold">Pokémons:</span>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {pokemons.map((poke, idx) => (
+                    <div
+                      key={idx}
+                      className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded"
+                    >
+                      <span>{poke}</span>
+                      <button
+                        className="text-xs text-red-500 ml-1"
+                        onClick={() => handleRemovePokemon(idx)}
+                      >
+                        Remover
+                      </button>
+                    </div>
+                  ))}
+                  {pokemons.length < 6 && (
+                    <button
+                      className="rounded bg-green-500 px-2 py-1 text-xs text-white hover:bg-green-700"
+                      onClick={() => {
+                        // Exemplo: adicionar um pokémon fictício
+                        const nome = prompt("Nome do Pokémon a adicionar:");
+                        if (nome) handleAddPokemon({ name: nome });
+                      }}
+                    >
+                      + Adicionar Pokémon
+                    </button>
+                  )}
+                </div>
+              </div>
+              <div className="flex gap-2 mt-2">
+                <button
+                  className="rounded bg-blue-500 px-4 py-1 text-white font-semibold hover:bg-blue-700"
+                  onClick={handleSaveTeam}
+                  disabled={!teamName || pokemons.length === 0}
+                >
+                  {"Salvar Alterações"}
+                </button>
+                {editingTeam && (
+                  <button
+                    className="rounded bg-gray-300 px-4 py-1 text-gray-700 font-semibold hover:bg-gray-400"
+                    onClick={handleNewTeam}
+                  >
+                    Cancelar
+                  </button>
+                )}
+              </div>
+            </div>
+
             {teams.map((team, teamIndex) => (
               <div
                 key={team.teamId || teamIndex}
@@ -86,12 +216,20 @@ export default function TeamPage() {
                   <h3 className="text-lg font-semibold text-gray-800">
                     {team.teamName || `Team ${teamIndex + 1}`}
                   </h3>
-                  <button
-                    className="ml-2 rounded bg-red-500 px-3 py-1 text-sm font-semibold text-white hover:bg-red-700"
-                    onClick={() => handleDeleteTeam(team.teamId)}
-                  >
-                    Delete
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      className="rounded bg-blue-500 px-3 py-1 text-sm font-semibold text-white hover:bg-blue-700"
+                      onClick={() => handleEditTeam(team)}
+                    >
+                      Editar
+                    </button>
+                    <button
+                      className="ml-2 rounded bg-red-500 px-3 py-1 text-sm font-semibold text-white hover:bg-red-700"
+                      onClick={() => handleDeleteTeam(team.teamId)}
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
                 <div className="grid grid-cols-3 gap-4">
                   {team.pokemonNames.map(
