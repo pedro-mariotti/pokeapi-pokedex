@@ -21,10 +21,6 @@ type Team = {
   pokemonNames: string[];
 };
 
-type TeamWithTypes = Team & {
-  pokemonData: PokemonData[];
-};
-
 const getPokemonTypes = async (name: string): Promise<PokemonTypeInfo[]> => {
   try {
     const res = await fetch(
