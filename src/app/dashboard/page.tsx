@@ -52,6 +52,10 @@ export default function Home() {
 
   const [currentScreen, setCurrentScreen] = useState(0);
 
+  // Pagination state for search
+  const [searchPage, setSearchPage] = useState(1);
+  const pageSize = 15;
+
   const handleNextScreen = () => {
     setCurrentScreen((prev) => (prev + 1) % 2);
   };
@@ -145,6 +149,21 @@ export default function Home() {
       console.error(error);
     }
   }
+
+  // Reset search page when search query changes or search is closed
+  useEffect(() => {
+    setSearchPage(1);
+  }, [searchQuery, selectedSlot]);
+
+  // Filtered pokemon for search
+  const filteredPokemon = pokemonList.filter((pokemon) =>
+    pokemon.name.toLowerCase().includes(searchQuery.toLowerCase()),
+  );
+  const totalPages = Math.ceil(filteredPokemon.length / pageSize);
+  const paginatedPokemon = filteredPokemon.slice(
+    (searchPage - 1) * pageSize,
+    searchPage * pageSize,
+  );
 
   return (
     <div className="max-h-max min-h-screen w-screen bg-gray-50 font-sans">
@@ -318,38 +337,52 @@ export default function Home() {
                 </button>
               </div>
               <ul className="flex flex-col gap-4 md:grid md:grid-cols-3">
-                {pokemonList
-                  .filter((pokemon) =>
-                    pokemon.name
-                      .toLowerCase()
-                      .includes(searchQuery.toLowerCase()),
-                  )
-                  .map((pokemon) => (
-                    <PokeCardSearch
-                      key={pokemon.name}
-                      poke_name={pokemon.name}
-                      poke_types={pokemon.types}
-                      poke_image={pokemon.sprite}
-                      poke_number={pokemon.id}
-                      setOpenModal={setOpenModal}
-                      setModalPokeDesc={setModalPokeDesc}
-                      setModalPokeImage={setModalPokeImage}
-                      setModalTypeArray={setModalPokeTypes}
-                      setmodalPokeNumber={setmodalPokeNumber}
-                      setModalPokeName={setmodalPokeName}
-                      poke_desc={""}
-                    />
-                  ))}
-                {pokemonList.filter((pokemon) =>
-                  pokemon.name
-                    .toLowerCase()
-                    .includes(searchQuery.toLowerCase()),
-                ).length === 0 && (
+                {paginatedPokemon.map((pokemon) => (
+                  <PokeCardSearch
+                    key={pokemon.name}
+                    poke_name={pokemon.name}
+                    poke_types={pokemon.types}
+                    poke_image={pokemon.sprite}
+                    poke_number={pokemon.id}
+                    setOpenModal={setOpenModal}
+                    setModalPokeDesc={setModalPokeDesc}
+                    setModalPokeImage={setModalPokeImage}
+                    setModalTypeArray={setModalPokeTypes}
+                    setmodalPokeNumber={setmodalPokeNumber}
+                    setModalPokeName={setmodalPokeName}
+                    poke_desc={""}
+                  />
+                ))}
+                {filteredPokemon.length === 0 && (
                   <p className="col-span-3 text-center text-gray-500">
                     Nenhum Pokémon encontrado.
                   </p>
                 )}
               </ul>
+              {/* Pagination controls */}
+              {filteredPokemon.length > pageSize && (
+                <div className="mt-4 flex justify-center gap-2">
+                  <button
+                    className="rounded bg-gray-200 px-3 py-1 text-gray-700 hover:bg-gray-300 disabled:opacity-50"
+                    onClick={() => setSearchPage((p) => Math.max(1, p - 1))}
+                    disabled={searchPage === 1}
+                  >
+                    Anterior
+                  </button>
+                  <span className="px-2 py-1 text-gray-700">
+                    Página {searchPage} de {totalPages}
+                  </span>
+                  <button
+                    className="rounded bg-gray-200 px-3 py-1 text-gray-700 hover:bg-gray-300 disabled:opacity-50"
+                    onClick={() =>
+                      setSearchPage((p) => Math.min(totalPages, p + 1))
+                    }
+                    disabled={searchPage === totalPages}
+                  >
+                    Próxima
+                  </button>
+                </div>
+              )}
             </div>
           </section>
         )}
