@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import EeveePlaceholder from "../../public/klipartz.com.png";
-import PokeCardTeam from "@/components/dashboard/PokeCardTeam";
+import PokeCardTeam from "../components/PokeCardTeam";
 import { StaticImageData } from "next/image";
 export default function PokeTeam(props: { bg_color: string }) {
   const [isLoading, setIsLoading] = useState(true);
