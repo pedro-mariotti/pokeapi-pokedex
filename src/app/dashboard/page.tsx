@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import PokeTeamSlot from "@/components/PokeTeamSlot";
 import PokeEvolution from "@/components/PokeEvolution";
 import { fetchPokemonList, fetchTypeAdvantages } from "@/utils/pokeapi";
-import PokeCardSearch from "@/components/PokeCardSearch";
+import PokeCardSearch from "../../components/PokeCardSearch";
 import PokeDetailsModal from "@/components/PokeDetailsModal";
 import PokeType from "@/components/aux components/type";
 
