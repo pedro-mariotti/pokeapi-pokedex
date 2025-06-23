@@ -251,6 +251,7 @@ export default function TeamPage() {
               }))
             : [];
           setTeams(formattedTeams);
+          console.log("Fetched teams:", formattedTeams);
         }
       } catch {}
     };
