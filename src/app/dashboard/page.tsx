@@ -8,6 +8,7 @@ import { fetchPokemonList, fetchTypeAdvantages } from "@/utils/pokeapi";
 import PokeCardSearch from "../../components/PokeCardSearch";
 import PokeDetailsModal from "@/components/PokeDetailsModal";
 import PokeType from "@/components/aux components/type";
+import Navbar from "@/components/Navbar";
 
 // Add your list of all possible types here
 const ALL_TYPES = [
@@ -214,28 +215,7 @@ export default function Home() {
         handleAddPokemon={handleAddPokemon}
       />
       <header className="bg-gradient-to-r from-red-500 to-red-700 p-6 shadow-md">
-        <nav className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-white">
-            Pokémon Team Builder
-          </h1>
-          <div className="flex items-center gap-4">
-            <button
-              className="rounded bg-white px-4 py-2 font-semibold text-red-600 hover:bg-gray-100"
-              onClick={() => router.push("/teams")}
-            >
-              Ver Times
-            </button>
-            <p className="text-sm text-gray-200">
-              Breno de Moura | Lucas Breda | Pedro Mariotti
-            </p>
-            <button
-              className="ml-4 rounded bg-white px-4 py-2 font-semibold text-red-600 hover:bg-gray-100"
-              onClick={handleLogout}
-            >
-              Log Out
-            </button>
-          </div>
-        </nav>
+        <Navbar />
       </header>
 
       <main className="px-4 py-8 md:px-16">
