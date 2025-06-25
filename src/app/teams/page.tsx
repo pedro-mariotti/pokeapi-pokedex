@@ -4,6 +4,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import SavedPokeTeamSlot from "@/components/SavedPokeTeamSlot";
+import Navbar from "@/components/Navbar";
 
 type PokemonTypeInfo = {
   name: string;
@@ -305,15 +306,8 @@ export default function TeamPage() {
 
   return (
     <div className="max-h-max min-h-screen w-screen bg-gray-50 font-sans">
-      <header className="bg-gradient-to-r from-red-500 to-red-700 p-6 shadow-md">
-        <div className="flex items-center justify-between">
-          <h1
-            className="cursor-pointer text-3xl font-bold text-white"
-            onClick={() => router.push("/dashboard")}
-          >
-            Pokémon Teams
-          </h1>
-        </div>
+      <header>
+        <Navbar />
       </header>
 
       <main className="px-4 py-8 md:px-16">

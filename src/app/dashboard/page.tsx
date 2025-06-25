@@ -214,7 +214,7 @@ export default function Home() {
         poke_desc={modalPokeDesc}
         handleAddPokemon={handleAddPokemon}
       />
-      <header className="bg-gradient-to-r from-red-500 to-red-700 p-6 shadow-md">
+      <header>
         <Navbar />
       </header>
 
