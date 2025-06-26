@@ -274,7 +274,7 @@ export default function TeamPage() {
                 teamId: teamObj._id || teamObj.teamId,
                 teamName: teamObj.teamName || "",
                 pokemonNames: teamObj.pokemonNames || [],
-              }))
+              })).reverse()
             : [];
           setTeams(formattedTeams);
           console.log("Fetched teams:", formattedTeams);
