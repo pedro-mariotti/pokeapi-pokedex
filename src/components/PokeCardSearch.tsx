@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { Dispatch, SetStateAction } from "react";
 import PokeType from "./aux components/type";
+import EeveePlaceholder from "../../public/klipartz.com.png";
 
 export default function PokeCardSearch(props: {
   poke_name: string;
@@ -32,7 +33,7 @@ export default function PokeCardSearch(props: {
         src={
           props.poke_image && props.poke_image.trim() !== ""
             ? props.poke_image
-            : "/placeholder.png"
+            : "../../public/klipartz.com.png"
         }
         className="h-20 w-20" // Aumentei o tamanho da imagem
         width={140}
