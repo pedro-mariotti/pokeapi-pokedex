@@ -2,6 +2,7 @@ import Image from "next/image";
 import { Dispatch, SetStateAction } from "react";
 import PokeType from "./aux components/type";
 import CloseIcon from "../../public/material-symbols--close-rounded.svg";
+import EeveePlaceholder from "../../public/klipartz.com.png"; // Placeholder image for loading state
 
 export default function PokeDetailsModal(props: {
   poke_name: string;
@@ -30,7 +31,7 @@ export default function PokeDetailsModal(props: {
 
         <div className="flex w-full flex-col items-center justify-center gap-8 md:flex-row">
           <Image
-            src={props.poke_image}
+            src={props.poke_image || EeveePlaceholder}
             alt="pokemon image"
             className="w-48 object-contain md:w-64" // Adicionado object-contain para corrigir a proporção da imagem
             width={96}

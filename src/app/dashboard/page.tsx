@@ -83,8 +83,10 @@ export default function Home() {
   };
 
   useEffect(() => {
+    console.log("Loading Pokemon List..."); // Log for debugging
     const loadPokemonList = async () => {
       const list = await fetchPokemonList();
+      console.log("Pokemon List Loaded:", list); // Log for debugging
       setPokemonList(list);
     };
     loadPokemonList();
@@ -183,7 +185,7 @@ export default function Home() {
       selectedTypes.every((type) => pokemon.types.includes(type));
     return matchesQuery && matchesType;
   });
-
+  console.log("Filtered Pokemon:", filteredPokemon);
   const totalPages = Math.ceil(filteredPokemon.length / pageSize);
   const paginatedPokemon = filteredPokemon.slice(
     (searchPage - 1) * pageSize,

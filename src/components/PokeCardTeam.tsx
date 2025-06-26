@@ -7,10 +7,12 @@ export default function PokeCardTeam(props: {
   const [imageLoaded, setImageLoaded] = useState(false);
   return (
     <li className="flex h-fit w-fit rounded-xl bg-[#f1f1f1] p-4">
-      <div className={`relative w-16 ${!imageLoaded ? 'animate-pulse bg-gray-200' : ''}`}>
-        <Image 
-          alt="pokemon image" 
-          src={props.poke_image} 
+      <div
+        className={`relative w-16 ${!imageLoaded ? "animate-pulse bg-gray-200" : ""}`}
+      >
+        <Image
+          alt="pokemon image"
+          src={props.poke_image || "../../public/klipartz.com.png"}
           className="w-16"
           onLoad={() => setImageLoaded(true)}
           priority
