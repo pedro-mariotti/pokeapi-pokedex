@@ -29,7 +29,16 @@ const getPokemonTypes = async (name: string): Promise<PokemonTypeInfo[]> => {
     );
     if (!res.ok) return [];
     const data = await res.json();
-    return data.types.map((t: any) => t.type);
+    // Accepts types as array of strings, e.g. ["grass", "poison"]
+    if (Array.isArray(data.types)) {
+      return data.types
+        .filter((t: any) => typeof t === "string" && t)
+        .map((typeName: string) => ({
+          name: typeName,
+          url: `https://pokeapi.co/api/v2/type/${typeName}`,
+        }));
+    }
+    return [];
   } catch {
     return [];
   }
@@ -83,6 +92,11 @@ const compareTeams = async (teamA: Team, teamB: Team) => {
   // Fetch type effectiveness chart
   const typeChart = await getTypeEffectiveness();
 
+  // Debug: log the types for both teams and the type chart
+  console.log("teamAData", teamAData);
+  console.log("teamBData", teamBData);
+  console.log("typeChart", typeChart);
+
   // Score calculation
   let teamAScore = 0;
   let teamBScore = 0;
@@ -102,11 +116,15 @@ const compareTeams = async (teamA: Team, teamB: Team) => {
   } = {
     teamA: teamAData.map((p) => ({
       name: p.name,
-      types: p.types.map((t) => t.name),
+      types: Array.isArray(p.types)
+        ? p.types.filter((t) => t && t.name).map((t) => t.name)
+        : [],
     })),
     teamB: teamBData.map((p) => ({
       name: p.name,
-      types: p.types.map((t) => t.name),
+      types: Array.isArray(p.types)
+        ? p.types.filter((t) => t && t.name).map((t) => t.name)
+        : [],
     })),
     effectiveness: [],
   };
