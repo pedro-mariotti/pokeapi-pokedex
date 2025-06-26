@@ -1,7 +1,6 @@
 import Image from "next/image";
 import { Dispatch, SetStateAction } from "react";
 import PokeType from "./aux components/type";
-import EeveePlaceholder from "../../public/klipartz.com.png";
 
 export default function PokeCardSearch(props: {
   poke_name: string;
