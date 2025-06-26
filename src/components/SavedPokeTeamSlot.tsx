@@ -19,9 +19,7 @@ const SavedPokeTeamSlot: React.FC<SavedPokeTeamSlotProps> = ({ name }) => {
   useEffect(() => {
     setLoading(true);
     setError(null);
-    fetch(
-      `https://pokedex-backend-woad.vercel.app/api/pokemon/${name.toLowerCase()}`,
-    )
+    fetch(`https://pokeapi.co/api/v2/pokemon/${name.toLowerCase()}`)
       .then((res) => {
         if (!res.ok) throw new Error("Pokémon not found");
         return res.json();

@@ -8,7 +8,6 @@ export default function Navbar() {
     localStorage.removeItem("token");
     router.replace("/");
   };
-
   return (
     <nav className="flex items-center justify-between bg-gradient-to-r from-red-500 to-red-700 p-6 shadow-md">
       <h1

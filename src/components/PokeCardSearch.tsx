@@ -3,9 +3,7 @@ import { Dispatch, SetStateAction, useEffect } from "react";
 import PokeType from "./aux components/type";
 
 async function fetchPokemonList() {
-  const response = await fetch(
-    "https://pokedex-backend-woad.vercel.app/api/pokemon?limit=100",
-  );
+  const response = await fetch("https://pokeapi.co/api/v2/pokemon?limit=100");
   if (!response.ok) {
     throw new Error("Erro ao buscar a lista de Pokémon");
   }
