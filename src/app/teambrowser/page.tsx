@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
@@ -9,6 +10,7 @@ const usePokemonImages = (pokemonNames: string[] = []) => {
   const [images, setImages] = useState<(string | null)[]>([]);
   // Keep track of last fetched names to avoid infinite requests
   const [lastNames, setLastNames] = useState<string[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
     // Only fetch if names have changed
@@ -23,8 +25,10 @@ const usePokemonImages = (pokemonNames: string[] = []) => {
       if (!pokemonNames.length) {
         setImages([]);
         setLastNames([]);
+        setLoading(false);
         return;
       }
+      setLoading(true);
       const results = await Promise.all(
         pokemonNames.map(async (name) => {
           if (!name) return null;
@@ -44,6 +48,7 @@ const usePokemonImages = (pokemonNames: string[] = []) => {
       if (isMounted) {
         setImages(results);
         setLastNames([...pokemonNames]);
+        setLoading(false);
       }
     }
     fetchImages();
@@ -52,7 +57,7 @@ const usePokemonImages = (pokemonNames: string[] = []) => {
     };
   }, [pokemonNames, lastNames]);
 
-  return images;
+  return [images, loading] as const;
 };
 
 const FilterCheckbox = ({ label }: { label: string }) => (
@@ -75,9 +80,10 @@ const TeamCard = ({ team, onClick }: { team: any; onClick: () => void }) => {
       ? team.pokemonNames[0]
       : null;
   // Use the hook to fetch the first pokemon's image
-  const [imageUrl] = usePokemonImages(
+  const [images, loading] = usePokemonImages(
     firstPokemonName ? [firstPokemonName] : [],
   );
+  const imageUrl = images[0];
 
   return (
     <div
@@ -87,15 +93,21 @@ const TeamCard = ({ team, onClick }: { team: any; onClick: () => void }) => {
       role="button"
       aria-label={`Abrir detalhes do time ${team.name}`}
     >
-      <Image
-        src={imageUrl || team.imageUrl || PlaceholderImage}
-        alt={team.name}
-        width={300}
-        height={160}
-        className="h-40 w-full object-cover"
-        // If using a remote image, fallback to <img> if needed
-        unoptimized={!!imageUrl}
-      />
+      <div className="h-40 w-full">
+        {loading ? (
+          <div className="h-full w-full animate-pulse bg-gray-200" />
+        ) : (
+          <Image
+            src={imageUrl || team.imageUrl || PlaceholderImage}
+            alt={team.name}
+            width={300}
+            height={160}
+            className="h-40 w-full object-cover"
+            // If using a remote image, fallback to <img> if needed
+            unoptimized={!!imageUrl}
+          />
+        )}
+      </div>
       <div className="p-4">
         <h3 className="mb-2 text-lg font-bold text-gray-800">{team.name}</h3>
         <div className="mb-1 flex items-center text-xs text-gray-500">
@@ -124,7 +136,7 @@ const TeamCard = ({ team, onClick }: { team: any; onClick: () => void }) => {
 const TeamModal = ({ team, onClose }: { team: any; onClose: () => void }) => {
   // Filter out empty/null names
   const pokemonNames: string[] = (team.pokemonNames || []).filter(Boolean);
-  const images = usePokemonImages(pokemonNames);
+  const [images, loading] = usePokemonImages(pokemonNames);
 
   return (
     <div className="bg-opacity-40 fixed inset-0 z-50 flex items-center justify-center bg-black">
@@ -151,7 +163,9 @@ const TeamModal = ({ team, onClose }: { team: any; onClose: () => void }) => {
                   {pokemonName ? (
                     <>
                       <div className="mb-1 flex h-16 w-16 items-center justify-center">
-                        {imageUrl ? (
+                        {loading ? (
+                          <div className="h-16 w-16 animate-pulse rounded bg-gray-200" />
+                        ) : imageUrl ? (
                           <img
                             src={imageUrl}
                             alt={pokemonName}
@@ -257,7 +271,7 @@ export default function TeamBrowserPage() {
               </div>
 
               <button className="w-full rounded-lg border border-gray-300 py-2 text-gray-700 transition hover:bg-gray-100">
-                Reset Filters
+                Limpar Filtros
               </button>
             </div>
           </aside>
