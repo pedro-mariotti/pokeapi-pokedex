@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import PlaceholderEevee from "../../public/klipartz.com.png"; // Placeholder image for loading state
 
 interface SavedPokeTeamSlotProps {
   name: string;
@@ -19,9 +20,7 @@ const SavedPokeTeamSlot: React.FC<SavedPokeTeamSlotProps> = ({ name }) => {
   useEffect(() => {
     setLoading(true);
     setError(null);
-    fetch(
-      `https://pokedex-backend-woad.vercel.app/api/pokemon/${name.toLowerCase()}`,
-    )
+    fetch(`https://pokeapi.co/api/v2/pokemon/${name.toLowerCase()}`)
       .then((res) => {
         if (!res.ok) throw new Error("Pokémon not found");
         return res.json();
@@ -41,23 +40,13 @@ const SavedPokeTeamSlot: React.FC<SavedPokeTeamSlotProps> = ({ name }) => {
   if (!pokemon) return null;
 
   return (
-    <div
-      style={{
-        border: "1px solid #ccc",
-        borderRadius: 8,
-        padding: 16,
-        width: 150,
-        textAlign: "center",
-        boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-        background: "#fff",
-      }}
-    >
+    <div className="w-[150px] rounded-lg border border-gray-300 bg-white p-4 text-center shadow-md">
       <Image
-        src={pokemon.sprites.front_default}
+        src={pokemon.sprites.front_default || PlaceholderEevee}
         alt={name}
         width={64}
         height={64}
-        style={{ borderRadius: 8, marginBottom: 8 }}
+        className="mx-auto mb-2 rounded-lg"
       />
       <div
         style={{

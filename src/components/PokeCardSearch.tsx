@@ -1,17 +1,6 @@
 import Image from "next/image";
-import { Dispatch, SetStateAction, useEffect } from "react";
+import { Dispatch, SetStateAction } from "react";
 import PokeType from "./aux components/type";
-
-async function fetchPokemonList() {
-  const response = await fetch(
-    "https://pokedex-backend-woad.vercel.app/api/pokemon?limit=100",
-  );
-  if (!response.ok) {
-    throw new Error("Erro ao buscar a lista de Pokémon");
-  }
-  const data = await response.json();
-  return data.results;
-}
 
 export default function PokeCardSearch(props: {
   poke_name: string;
@@ -26,18 +15,6 @@ export default function PokeCardSearch(props: {
   setModalPokeDesc: Dispatch<SetStateAction<string>>;
   setModalPokeImage: Dispatch<SetStateAction<string>>;
 }) {
-  useEffect(() => {
-    const loadPokemonList = async () => {
-      try {
-        const list = await fetchPokemonList();
-        console.log(list); // Apenas log para depuração
-      } catch (error) {
-        console.error("Erro ao carregar a lista de Pokémon:", error);
-      }
-    };
-    loadPokemonList();
-  }, []);
-
   return (
     <li
       className="flex h-fit w-full cursor-pointer rounded-xl bg-[#f1f1f1] p-4"

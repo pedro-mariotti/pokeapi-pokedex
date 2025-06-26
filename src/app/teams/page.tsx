@@ -240,7 +240,7 @@ export default function TeamPage() {
     const fetchTeams = async () => {
       try {
         const response = await fetch(
-          `http://localhost:1337/api/poketeams/user/${userId}`,
+          `https://pokedex-backend-woad.vercel.app/api/poketeams/user/${userId}`,
         );
         if (response.ok) {
           const data = await response.json();
