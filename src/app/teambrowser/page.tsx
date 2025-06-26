@@ -53,6 +53,8 @@ const TeamCard = ({ team, onClick }: { team: any; onClick: () => void }) => (
   </div>
 );
 
+// Modified TeamModal to display pokemons from team.pokemonNames (array of strings)
+// FIX: Accept onClose prop and use it for closing the modal
 const TeamModal = ({ team, onClose }: { team: any; onClose: () => void }) => (
   <div className="bg-opacity-40 fixed inset-0 z-50 flex items-center justify-center bg-black">
     <div className="relative w-full max-w-lg rounded-lg bg-white p-6 shadow-lg">
@@ -65,7 +67,7 @@ const TeamModal = ({ team, onClose }: { team: any; onClose: () => void }) => (
       </button>
       <h2 className="mb-4 text-2xl font-bold text-gray-800">{team.name}</h2>
       <div className="mb-4 flex flex-wrap gap-2">
-        {Array.isArray(team.types) ? (
+        {/* {Array.isArray(team.types) ? (
           team.types.map((type: string, idx: number) => (
             <span
               key={idx}
@@ -78,36 +80,29 @@ const TeamModal = ({ team, onClose }: { team: any; onClose: () => void }) => (
           <span className="rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-700">
             {team.types}
           </span>
-        )}
+        )} */}
       </div>
       <div>
         <h3 className="mb-2 text-lg font-semibold text-gray-700">Pokémons</h3>
         <div className="grid grid-cols-3 gap-4">
           {[...Array(6)].map((_, idx) => {
-            const pokemon = team.pokemon?.[idx];
+            // Use team.pokemonNames (array of strings)
+            const pokemonName = team.pokemonNames?.[idx];
             return (
               <div
                 key={idx}
                 className="flex flex-col items-center justify-center rounded border border-gray-200 bg-gray-50 p-2"
               >
-                {pokemon ? (
+                {pokemonName ? (
                   <>
                     <div className="mb-1 flex h-16 w-16 items-center justify-center">
-                      {pokemon.image ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={pokemon.image}
-                          alt={pokemon.name}
-                          className="h-16 w-16 object-contain"
-                        />
-                      ) : (
-                        <span className="flex h-16 w-16 items-center justify-center rounded bg-gray-200 text-gray-400">
-                          ?
-                        </span>
-                      )}
+                      {/* Optionally, you can fetch and display an image for the pokemonName if you want */}
+                      <span className="flex h-16 w-16 items-center justify-center rounded bg-gray-200 text-xl font-bold text-gray-700 uppercase">
+                        {pokemonName.charAt(0)}
+                      </span>
                     </div>
                     <span className="text-sm font-medium text-gray-700">
-                      {pokemon.name}
+                      {pokemonName}
                     </span>
                   </>
                 ) : (
@@ -134,6 +129,12 @@ export default function TeamBrowserPage() {
   const [loading, setLoading] = useState(true);
   const [selectedTeam, setSelectedTeam] = useState<any | null>(null);
 
+  // FIX: handleSelectTeam can now be used for both open and close
+  const handleSelectTeam = (team?: any) => {
+    console.log("Selected team:", team);
+    setSelectedTeam(team ?? null);
+  };
+
   useEffect(() => {
     async function fetchTeams() {
       setLoading(true);
@@ -149,6 +150,7 @@ export default function TeamBrowserPage() {
           id: team.id || team._id || team.teamId,
           name: team.teamName,
           pokemon: team.pokemonNames,
+          pokemonNames: team.pokemonNames, // Ensure pokemonNames is present for TeamModal
         }));
 
         setTeams(mappedTeams);
@@ -238,7 +240,7 @@ export default function TeamBrowserPage() {
       </div>
 
       {selectedTeam && (
-        <TeamModal team={selectedTeam} onClose={() => setSelectedTeam(null)} />
+        <TeamModal team={selectedTeam} onClose={() => handleSelectTeam()} />
       )}
     </div>
   );
