@@ -1,9 +1,65 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Image from "next/image";
 import PlaceholderImage from "../../../public/klipartz.com.png";
+
+// Helper hook to fetch pokemon images by name
+const usePokemonImages = (pokemonNames: string[] = []) => {
+  const [images, setImages] = useState<(string | null)[]>([]);
+  // Keep track of last fetched names to avoid infinite requests
+  const [lastNames, setLastNames] = useState<string[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+
+  useEffect(() => {
+    // Only fetch if names have changed
+    if (
+      pokemonNames.length === lastNames.length &&
+      pokemonNames.every((name, i) => name === lastNames[i])
+    ) {
+      return;
+    }
+    let isMounted = true;
+    async function fetchImages() {
+      if (!pokemonNames.length) {
+        setImages([]);
+        setLastNames([]);
+        setLoading(false);
+        return;
+      }
+      setLoading(true);
+      const results = await Promise.all(
+        pokemonNames.map(async (name) => {
+          if (!name) return null;
+          try {
+            const res = await fetch(
+              `https://pokedex-backend-woad.vercel.app/api/pokemon/${name.toLowerCase()}`,
+            );
+            if (!res.ok) return null;
+            const data = await res.json();
+            // Try to get the official artwork or fallback to sprite
+            return data?.sprite || data?.sprites?.front_default || null;
+          } catch {
+            return null;
+          }
+        }),
+      );
+      if (isMounted) {
+        setImages(results);
+        setLastNames([...pokemonNames]);
+        setLoading(false);
+      }
+    }
+    fetchImages();
+    return () => {
+      isMounted = false;
+    };
+  }, [pokemonNames, lastNames]);
+
+  return [images, loading] as const;
+};
 
 const FilterCheckbox = ({ label }: { label: string }) => (
   <li>
@@ -17,180 +73,172 @@ const FilterCheckbox = ({ label }: { label: string }) => (
   </li>
 );
 
-const TeamCard = ({ team, onClick }: { team: any; onClick: () => void }) => (
-  <div
-    className="cursor-pointer overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-shadow duration-300 hover:shadow-lg"
-    onClick={onClick}
-    tabIndex={0}
-    role="button"
-    aria-label={`Abrir detalhes do time ${team.name}`}
-  >
-    <Image
-      src={team.imageUrl}
-      alt={team.name}
-      width={300}
-      height={160}
-      className="h-40 w-full object-cover"
-    />
-    <div className="p-4">
-      <h3 className="mb-2 text-lg font-bold text-gray-800">{team.name}</h3>
-      <div className="mb-1 flex items-center text-xs text-gray-500">
-        {Array.isArray(team.types) ? (
-          team.types.map((type: string, index: number) => (
-            <span
-              key={index}
-              className="mr-1 rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-700"
-            >
-              {type}
-            </span>
-          ))
-        ) : (
-          <span className="rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-700">
-            {team.types}
-          </span>
-        )}
-      </div>
-    </div>
-  </div>
-);
+// --- MODIFIED TeamCard to show first pokemon sprite ---
+const TeamCard = ({ team, onClick }: { team: any; onClick: () => void }) => {
+  // Get the first pokemon name from the team
+  const firstPokemonName =
+    Array.isArray(team.pokemonNames) && team.pokemonNames.length > 0
+      ? team.pokemonNames[0]
+      : null;
+  // Use the hook to fetch the first pokemon's image
+  const [images, loading] = usePokemonImages(
+    firstPokemonName ? [firstPokemonName] : [],
+  );
+  const imageUrl = images[0];
 
-const TeamModal = ({ team, onClose }: { team: any; onClose: () => void }) => (
-  <div className="bg-opacity-40 fixed inset-0 z-50 flex items-center justify-center bg-black">
-    <div className="relative w-full max-w-lg rounded-lg bg-white p-6 shadow-lg">
-      <button
-        className="absolute top-4 right-4 text-2xl text-gray-500 hover:text-gray-700"
-        onClick={onClose}
-        aria-label="Fechar modal"
-      >
-        &times;
-      </button>
-      <h2 className="mb-4 text-2xl font-bold text-gray-800">{team.name}</h2>
-      <div className="mb-4 flex flex-wrap gap-2">
-        {Array.isArray(team.types) ? (
-          team.types.map((type: string, idx: number) => (
-            <span
-              key={idx}
-              className="rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-700"
-            >
-              {type}
-            </span>
-          ))
+  return (
+    <div
+      className="cursor-pointer overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-shadow duration-300 hover:shadow-lg"
+      onClick={onClick}
+      tabIndex={0}
+      role="button"
+      aria-label={`Abrir detalhes do time ${team.name}`}
+    >
+      <div className="h-40 w-full">
+        {loading ? (
+          <div className="h-full w-full animate-pulse bg-gray-200" />
         ) : (
-          <span className="rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-700">
-            {team.types}
-          </span>
+          <Image
+            src={imageUrl || team.imageUrl || PlaceholderImage}
+            alt={team.name}
+            width={300}
+            height={160}
+            className="h-40 w-full object-cover"
+            // If using a remote image, fallback to <img> if needed
+            unoptimized={!!imageUrl}
+          />
         )}
       </div>
-      <div>
-        <h3 className="mb-2 text-lg font-semibold text-gray-700">Pokémons</h3>
-        <div className="grid grid-cols-3 gap-4">
-          {[...Array(6)].map((_, idx) => {
-            const pokemon = team.pokemon[idx];
-            return (
-              <div
-                key={idx}
-                className="flex flex-col items-center justify-center rounded border border-gray-200 bg-gray-50 p-2"
+      <div className="p-4">
+        <h3 className="mb-2 text-lg font-bold text-gray-800">{team.name}</h3>
+        <div className="mb-1 flex items-center text-xs text-gray-500">
+          {Array.isArray(team.types) ? (
+            team.types.map((type: string, index: number) => (
+              <span
+                key={index}
+                className="mr-1 rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-700"
               >
-                {pokemon ? (
-                  <>
-                    <div className="mb-1 flex h-16 w-16 items-center justify-center">
-                      {pokemon.image ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={pokemon.image}
-                          alt={pokemon.name}
-                          className="h-16 w-16 object-contain"
-                        />
-                      ) : (
-                        <span className="flex h-16 w-16 items-center justify-center rounded bg-gray-200 text-gray-400">
-                          ?
-                        </span>
-                      )}
-                    </div>
-                    <span className="text-sm font-medium text-gray-700">
-                      {pokemon.name}
-                    </span>
-                  </>
-                ) : (
-                  <>
-                    <div className="mb-1 flex h-16 w-16 items-center justify-center">
-                      <span className="flex h-16 w-16 items-center justify-center rounded bg-gray-200 text-gray-400">
-                        -
-                      </span>
-                    </div>
-                    <span className="text-sm text-gray-400">Vazio</span>
-                  </>
-                )}
-              </div>
-            );
-          })}
+                {type}
+              </span>
+            ))
+          ) : (
+            <span className="rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-700">
+              {team.types}
+            </span>
+          )}
         </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
+
+// Modified TeamModal to display pokemons from team.pokemonNames (array of strings)
+// Now fetches and displays pokemon images
+const TeamModal = ({ team, onClose }: { team: any; onClose: () => void }) => {
+  // Filter out empty/null names
+  const pokemonNames: string[] = (team.pokemonNames || []).filter(Boolean);
+  const [images, loading] = usePokemonImages(pokemonNames);
+
+  return (
+    <div className="bg-opacity-40 fixed inset-0 z-50 flex items-center justify-center bg-black">
+      <div className="relative w-full max-w-lg rounded-lg bg-white p-6 shadow-lg">
+        <button
+          className="absolute top-4 right-4 text-2xl text-gray-500 hover:text-gray-700"
+          onClick={onClose}
+          aria-label="Fechar modal"
+        >
+          &times;
+        </button>
+        <h2 className="mb-4 text-2xl font-bold text-gray-800">{team.name}</h2>
+        <div>
+          <h3 className="mb-2 text-lg font-semibold text-gray-700">Pokémons</h3>
+          <div className="grid grid-cols-3 gap-4">
+            {[...Array(6)].map((_, idx) => {
+              const pokemonName = pokemonNames[idx];
+              const imageUrl = images[idx];
+              return (
+                <div
+                  key={idx}
+                  className="flex flex-col items-center justify-center rounded border border-gray-200 bg-gray-50 p-2"
+                >
+                  {pokemonName ? (
+                    <>
+                      <div className="mb-1 flex h-16 w-16 items-center justify-center">
+                        {loading ? (
+                          <div className="h-16 w-16 animate-pulse rounded bg-gray-200" />
+                        ) : imageUrl ? (
+                          <img
+                            src={imageUrl}
+                            alt={pokemonName}
+                            className="h-16 w-16 object-contain"
+                          />
+                        ) : (
+                          <span className="flex h-16 w-16 items-center justify-center rounded bg-gray-200 text-xl font-bold text-gray-700 uppercase">
+                            {pokemonName.charAt(0)}
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-sm font-medium text-gray-700">
+                        {pokemonName}
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <div className="mb-1 flex h-16 w-16 items-center justify-center">
+                        <span className="flex h-16 w-16 items-center justify-center rounded bg-gray-200 text-gray-400">
+                          -
+                        </span>
+                      </div>
+                      <span className="text-sm text-gray-400">Vazio</span>
+                    </>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export default function TeamBrowserPage() {
-  const teams = [
-    {
-      id: "#TMB-001",
-      imageUrl: PlaceholderImage,
-      name: "Blazing Dragons",
-      types: ["Fire", "Dragon"],
-      pokemon: [
-        { name: "Charizard", image: "" },
-        { name: "Dragonite", image: "" },
-        { name: "Salamence", image: "" },
-        { name: "Garchomp", image: "" },
-        { name: "Reshiram", image: "" },
-        { name: "Dragapult", image: "" },
-      ],
-    },
-    {
-      id: "#TMB-002",
-      imageUrl: PlaceholderImage,
-      name: "Aqua Defenders",
-      types: "Water",
-      pokemon: [
-        { name: "Blastoise", image: "" },
-        { name: "Gyarados", image: "" },
-        { name: "Swampert", image: "" },
-        { name: "Milotic", image: "" },
-        { name: "Greninja", image: "" },
-        { name: "Ludicolo", image: "" },
-      ],
-    },
-    {
-      id: "#TMB-003",
-      imageUrl: PlaceholderImage,
-      name: "Forest Guardians",
-      types: "Grass",
-      pokemon: [
-        { name: "Venusaur", image: "" },
-        { name: "Sceptile", image: "" },
-        { name: "Torterra", image: "" },
-        { name: "Serperior", image: "" },
-        { name: "Decidueye", image: "" },
-        { name: "Rillaboom", image: "" },
-      ],
-    },
-    {
-      id: "#TMB-004",
-      imageUrl: PlaceholderImage,
-      name: "Shocking Speedsters",
-      types: "Electric",
-      pokemon: [
-        { name: "Raichu", image: "" },
-        { name: "Jolteon", image: "" },
-        { name: "Electivire", image: "" },
-        { name: "Magnezone", image: "" },
-        { name: "Zeraora", image: "" },
-        { name: "Rotom", image: "" },
-      ],
-    },
-  ];
-
+  const [teams, setTeams] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedTeam, setSelectedTeam] = useState<any | null>(null);
+
+  // FIX: handleSelectTeam can now be used for both open and close
+  const handleSelectTeam = (team?: any) => {
+    console.log("Selected team:", team);
+    setSelectedTeam(team ?? null);
+  };
+
+  useEffect(() => {
+    async function fetchTeams() {
+      setLoading(true);
+      try {
+        // Replace with your backend API endpoint
+        const res = await fetch(
+          "https://pokedex-backend-woad.vercel.app/api/poketeams/search",
+        );
+        const data = await res.json();
+
+        // Map backend data to expected team shape
+        const mappedTeams = data.map((team: any) => ({
+          id: team.id || team._id || team.teamId,
+          name: team.teamName,
+          pokemon: team.pokemonNames,
+          pokemonNames: team.pokemonNames, // Ensure pokemonNames is present for TeamModal
+        }));
+
+        setTeams(mappedTeams);
+      } catch (e) {
+        setTeams([]);
+      }
+      setLoading(false);
+    }
+    fetchTeams();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans">
@@ -224,7 +272,7 @@ export default function TeamBrowserPage() {
               </div>
 
               <button className="w-full rounded-lg border border-gray-300 py-2 text-gray-700 transition hover:bg-gray-100">
-                Reset Filters
+                Limpar Filtros
               </button>
             </div>
           </aside>
@@ -240,15 +288,21 @@ export default function TeamBrowserPage() {
               </button>
             </div>
 
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
-              {teams.map((team) => (
-                <TeamCard
-                  key={team.id}
-                  team={team}
-                  onClick={() => setSelectedTeam(team)}
-                />
-              ))}
-            </div>
+            {loading ? (
+              <div className="text-center text-gray-500">
+                Carregando times...
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
+                {teams.map((team) => (
+                  <TeamCard
+                    key={team.id}
+                    team={team}
+                    onClick={() => setSelectedTeam(team)}
+                  />
+                ))}
+              </div>
+            )}
 
             <div className="mt-8 flex items-center justify-center space-x-4">
               <button className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
@@ -264,7 +318,7 @@ export default function TeamBrowserPage() {
       </div>
 
       {selectedTeam && (
-        <TeamModal team={selectedTeam} onClose={() => setSelectedTeam(null)} />
+        <TeamModal team={selectedTeam} onClose={() => handleSelectTeam()} />
       )}
     </div>
   );

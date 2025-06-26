@@ -25,7 +25,7 @@ type Team = {
 const getPokemonTypes = async (name: string): Promise<PokemonTypeInfo[]> => {
   try {
     const res = await fetch(
-      `https://pokeapi.co/api/v2/pokemon/${name.toLowerCase()}`,
+      `https://pokedex-backend-woad.vercel.app/api/pokemon/${name.toLowerCase()}`,
     );
     if (!res.ok) return [];
     const data = await res.json();
