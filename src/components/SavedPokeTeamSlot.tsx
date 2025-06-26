@@ -7,9 +7,7 @@ interface SavedPokeTeamSlotProps {
 }
 
 interface PokemonData {
-  sprites: {
-    front_default: string;
-  };
+  sprite: string;
 }
 
 const SavedPokeTeamSlot: React.FC<SavedPokeTeamSlotProps> = ({ name }) => {
@@ -20,12 +18,15 @@ const SavedPokeTeamSlot: React.FC<SavedPokeTeamSlotProps> = ({ name }) => {
   useEffect(() => {
     setLoading(true);
     setError(null);
-    fetch(`https://pokeapi.co/api/v2/pokemon/${name.toLowerCase()}`)
+    fetch(
+      `https://pokedex-backend-woad.vercel.app/api/pokemon/${name.toLowerCase()}`,
+    )
       .then((res) => {
         if (!res.ok) throw new Error("Pokémon not found");
         return res.json();
       })
       .then((data) => {
+        console.log("Fetched Pokémon data:", data);
         setPokemon(data);
         setLoading(false);
       })
@@ -44,7 +45,7 @@ const SavedPokeTeamSlot: React.FC<SavedPokeTeamSlotProps> = ({ name }) => {
     <div className="mx-auto flex w-full max-w-[180px] flex-col items-center rounded-lg border border-gray-300 bg-white p-2 text-center shadow-md sm:max-w-[150px] sm:p-4">
       <div className="flex h-20 w-20 items-center justify-center sm:h-16 sm:w-16">
         <Image
-          src={pokemon.sprites.front_default || PlaceholderEevee}
+          src={pokemon.sprite || PlaceholderEevee}
           alt={name}
           width={80}
           height={80}
