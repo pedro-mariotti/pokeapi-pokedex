@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Image from "next/image";
 import PlaceholderImage from "../../../public/klipartz.com.png";
@@ -9,12 +10,10 @@ import PlaceholderImage from "../../../public/klipartz.com.png";
 // Helper hook to fetch pokemon images by name
 const usePokemonImages = (pokemonNames: string[] = []) => {
   const [images, setImages] = useState<(string | null)[]>([]);
-  // Keep track of last fetched names to avoid infinite requests
   const [lastNames, setLastNames] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
-    // Only fetch if names have changed
     if (
       pokemonNames.length === lastNames.length &&
       pokemonNames.every((name, i) => name === lastNames[i])
@@ -39,7 +38,6 @@ const usePokemonImages = (pokemonNames: string[] = []) => {
             );
             if (!res.ok) return null;
             const data = await res.json();
-            // Try to get the official artwork or fallback to sprite
             return data?.sprite || data?.sprites?.front_default || null;
           } catch {
             return null;
@@ -73,14 +71,11 @@ const FilterCheckbox = ({ label }: { label: string }) => (
   </li>
 );
 
-// --- MODIFIED TeamCard to show first pokemon sprite ---
 const TeamCard = ({ team, onClick }: { team: any; onClick: () => void }) => {
-  // Get the first pokemon name from the team
   const firstPokemonName =
     Array.isArray(team.pokemonNames) && team.pokemonNames.length > 0
       ? team.pokemonNames[0]
       : null;
-  // Use the hook to fetch the first pokemon's image
   const [images, loading] = usePokemonImages(
     firstPokemonName ? [firstPokemonName] : [],
   );
@@ -104,7 +99,6 @@ const TeamCard = ({ team, onClick }: { team: any; onClick: () => void }) => {
             width={300}
             height={160}
             className="h-40 w-full object-cover"
-            // If using a remote image, fallback to <img> if needed
             unoptimized={!!imageUrl}
           />
         )}
@@ -132,10 +126,7 @@ const TeamCard = ({ team, onClick }: { team: any; onClick: () => void }) => {
   );
 };
 
-// Modified TeamModal to display pokemons from team.pokemonNames (array of strings)
-// Now fetches and displays pokemon images
 const TeamModal = ({ team, onClose }: { team: any; onClose: () => void }) => {
-  // Filter out empty/null names
   const pokemonNames: string[] = (team.pokemonNames || []).filter(Boolean);
   const [images, loading] = usePokemonImages(pokemonNames);
 
@@ -206,10 +197,18 @@ export default function TeamBrowserPage() {
   const [teams, setTeams] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedTeam, setSelectedTeam] = useState<any | null>(null);
+  const router = useRouter();
 
-  // FIX: handleSelectTeam can now be used for both open and close
+  // Check for token on mount
+  useEffect(() => {
+    const token =
+      typeof window !== "undefined" ? localStorage.getItem("token") : null;
+    if (!token) {
+      router.replace("/");
+    }
+  }, [router]);
+
   const handleSelectTeam = (team?: any) => {
-    console.log("Selected team:", team);
     setSelectedTeam(team ?? null);
   };
 
@@ -217,18 +216,16 @@ export default function TeamBrowserPage() {
     async function fetchTeams() {
       setLoading(true);
       try {
-        // Replace with your backend API endpoint
         const res = await fetch(
           "https://pokedex-backend-woad.vercel.app/api/poketeams/search",
         );
         const data = await res.json();
 
-        // Map backend data to expected team shape
         const mappedTeams = data.map((team: any) => ({
           id: team.id || team._id || team.teamId,
           name: team.teamName,
           pokemon: team.pokemonNames,
-          pokemonNames: team.pokemonNames, // Ensure pokemonNames is present for TeamModal
+          pokemonNames: team.pokemonNames,
         }));
 
         setTeams(mappedTeams);

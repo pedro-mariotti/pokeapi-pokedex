@@ -250,6 +250,13 @@ export default function TeamPage() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+    // --- Token check ---
+    const token = localStorage.getItem("token");
+    if (!token) {
+      router.replace("/");
+      return;
+    }
+    // --- End token check ---
     const userId = localStorage.getItem("userId");
     if (!userId) {
       router.replace("/");
