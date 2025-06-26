@@ -26,7 +26,7 @@ export default function PokeEvolution({ pokemonName }: PokeEvolutionProps) {
         setError(null);
 
         const speciesResponse = await fetch(
-          `https://pokedex-backend-woad.vercel.app/api/pokemon/${pokemonName}/species`,
+          `https://pokeapi.co/api/v2/pokemon-species/${pokemonName}`,
         );
         const speciesData = await speciesResponse.json();
 
@@ -63,7 +63,7 @@ export default function PokeEvolution({ pokemonName }: PokeEvolutionProps) {
           processedEvolutions.push({
             id: pokemonData.id,
             name: currentEvolution.species.name,
-            sprite: pokemonData.sprites.front_default,
+            sprite: pokemonData.sprite,
             method,
             item,
           });
