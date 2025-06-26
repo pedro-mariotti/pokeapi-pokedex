@@ -226,7 +226,7 @@ export default function TeamBrowserPage() {
           name: team.teamName,
           pokemon: team.pokemonNames,
           pokemonNames: team.pokemonNames,
-        }));
+        })).reverse();
 
         setTeams(mappedTeams);
       } catch (e) {
