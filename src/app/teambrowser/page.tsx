@@ -67,42 +67,57 @@ const FilterCheckbox = ({ label }: { label: string }) => (
   </li>
 );
 
-const TeamCard = ({ team, onClick }: { team: any; onClick: () => void }) => (
-  <div
-    className="cursor-pointer overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-shadow duration-300 hover:shadow-lg"
-    onClick={onClick}
-    tabIndex={0}
-    role="button"
-    aria-label={`Abrir detalhes do time ${team.name}`}
-  >
-    <Image
-      src={team.imageUrl || PlaceholderImage}
-      alt={team.name}
-      width={300}
-      height={160}
-      className="h-40 w-full object-cover"
-    />
-    <div className="p-4">
-      <h3 className="mb-2 text-lg font-bold text-gray-800">{team.name}</h3>
-      <div className="mb-1 flex items-center text-xs text-gray-500">
-        {Array.isArray(team.types) ? (
-          team.types.map((type: string, index: number) => (
-            <span
-              key={index}
-              className="mr-1 rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-700"
-            >
-              {type}
+// --- MODIFIED TeamCard to show first pokemon sprite ---
+const TeamCard = ({ team, onClick }: { team: any; onClick: () => void }) => {
+  // Get the first pokemon name from the team
+  const firstPokemonName =
+    Array.isArray(team.pokemonNames) && team.pokemonNames.length > 0
+      ? team.pokemonNames[0]
+      : null;
+  // Use the hook to fetch the first pokemon's image
+  const [imageUrl] = usePokemonImages(
+    firstPokemonName ? [firstPokemonName] : [],
+  );
+
+  return (
+    <div
+      className="cursor-pointer overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-shadow duration-300 hover:shadow-lg"
+      onClick={onClick}
+      tabIndex={0}
+      role="button"
+      aria-label={`Abrir detalhes do time ${team.name}`}
+    >
+      <Image
+        src={imageUrl || team.imageUrl || PlaceholderImage}
+        alt={team.name}
+        width={300}
+        height={160}
+        className="h-40 w-full object-cover"
+        // If using a remote image, fallback to <img> if needed
+        unoptimized={!!imageUrl}
+      />
+      <div className="p-4">
+        <h3 className="mb-2 text-lg font-bold text-gray-800">{team.name}</h3>
+        <div className="mb-1 flex items-center text-xs text-gray-500">
+          {Array.isArray(team.types) ? (
+            team.types.map((type: string, index: number) => (
+              <span
+                key={index}
+                className="mr-1 rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-700"
+              >
+                {type}
+              </span>
+            ))
+          ) : (
+            <span className="rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-700">
+              {team.types}
             </span>
-          ))
-        ) : (
-          <span className="rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-700">
-            {team.types}
-          </span>
-        )}
+          )}
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 // Modified TeamModal to display pokemons from team.pokemonNames (array of strings)
 // Now fetches and displays pokemon images
