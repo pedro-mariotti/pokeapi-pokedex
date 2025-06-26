@@ -4,6 +4,57 @@ import Navbar from "@/components/Navbar";
 import Image from "next/image";
 import PlaceholderImage from "../../../public/klipartz.com.png";
 
+// Helper hook to fetch pokemon images by name
+const usePokemonImages = (pokemonNames: string[] = []) => {
+  const [images, setImages] = useState<(string | null)[]>([]);
+  // Keep track of last fetched names to avoid infinite requests
+  const [lastNames, setLastNames] = useState<string[]>([]);
+
+  useEffect(() => {
+    // Only fetch if names have changed
+    if (
+      pokemonNames.length === lastNames.length &&
+      pokemonNames.every((name, i) => name === lastNames[i])
+    ) {
+      return;
+    }
+    let isMounted = true;
+    async function fetchImages() {
+      if (!pokemonNames.length) {
+        setImages([]);
+        setLastNames([]);
+        return;
+      }
+      const results = await Promise.all(
+        pokemonNames.map(async (name) => {
+          if (!name) return null;
+          try {
+            const res = await fetch(
+              `https://pokedex-backend-woad.vercel.app/api/pokemon/${name.toLowerCase()}`,
+            );
+            if (!res.ok) return null;
+            const data = await res.json();
+            // Try to get the official artwork or fallback to sprite
+            return data?.sprite || data?.sprites?.front_default || null;
+          } catch {
+            return null;
+          }
+        }),
+      );
+      if (isMounted) {
+        setImages(results);
+        setLastNames([...pokemonNames]);
+      }
+    }
+    fetchImages();
+    return () => {
+      isMounted = false;
+    };
+  }, [pokemonNames, lastNames]);
+
+  return images;
+};
+
 const FilterCheckbox = ({ label }: { label: string }) => (
   <li>
     <label className="flex items-center space-x-2 font-normal">
@@ -54,75 +105,72 @@ const TeamCard = ({ team, onClick }: { team: any; onClick: () => void }) => (
 );
 
 // Modified TeamModal to display pokemons from team.pokemonNames (array of strings)
-// FIX: Accept onClose prop and use it for closing the modal
-const TeamModal = ({ team, onClose }: { team: any; onClose: () => void }) => (
-  <div className="bg-opacity-40 fixed inset-0 z-50 flex items-center justify-center bg-black">
-    <div className="relative w-full max-w-lg rounded-lg bg-white p-6 shadow-lg">
-      <button
-        className="absolute top-4 right-4 text-2xl text-gray-500 hover:text-gray-700"
-        onClick={onClose}
-        aria-label="Fechar modal"
-      >
-        &times;
-      </button>
-      <h2 className="mb-4 text-2xl font-bold text-gray-800">{team.name}</h2>
-      <div className="mb-4 flex flex-wrap gap-2">
-        {/* {Array.isArray(team.types) ? (
-          team.types.map((type: string, idx: number) => (
-            <span
-              key={idx}
-              className="rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-700"
-            >
-              {type}
-            </span>
-          ))
-        ) : (
-          <span className="rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-700">
-            {team.types}
-          </span>
-        )} */}
-      </div>
-      <div>
-        <h3 className="mb-2 text-lg font-semibold text-gray-700">Pokémons</h3>
-        <div className="grid grid-cols-3 gap-4">
-          {[...Array(6)].map((_, idx) => {
-            // Use team.pokemonNames (array of strings)
-            const pokemonName = team.pokemonNames?.[idx];
-            return (
-              <div
-                key={idx}
-                className="flex flex-col items-center justify-center rounded border border-gray-200 bg-gray-50 p-2"
-              >
-                {pokemonName ? (
-                  <>
-                    <div className="mb-1 flex h-16 w-16 items-center justify-center">
-                      {/* Optionally, you can fetch and display an image for the pokemonName if you want */}
-                      <span className="flex h-16 w-16 items-center justify-center rounded bg-gray-200 text-xl font-bold text-gray-700 uppercase">
-                        {pokemonName.charAt(0)}
+// Now fetches and displays pokemon images
+const TeamModal = ({ team, onClose }: { team: any; onClose: () => void }) => {
+  // Filter out empty/null names
+  const pokemonNames: string[] = (team.pokemonNames || []).filter(Boolean);
+  const images = usePokemonImages(pokemonNames);
+
+  return (
+    <div className="bg-opacity-40 fixed inset-0 z-50 flex items-center justify-center bg-black">
+      <div className="relative w-full max-w-lg rounded-lg bg-white p-6 shadow-lg">
+        <button
+          className="absolute top-4 right-4 text-2xl text-gray-500 hover:text-gray-700"
+          onClick={onClose}
+          aria-label="Fechar modal"
+        >
+          &times;
+        </button>
+        <h2 className="mb-4 text-2xl font-bold text-gray-800">{team.name}</h2>
+        <div>
+          <h3 className="mb-2 text-lg font-semibold text-gray-700">Pokémons</h3>
+          <div className="grid grid-cols-3 gap-4">
+            {[...Array(6)].map((_, idx) => {
+              const pokemonName = pokemonNames[idx];
+              const imageUrl = images[idx];
+              return (
+                <div
+                  key={idx}
+                  className="flex flex-col items-center justify-center rounded border border-gray-200 bg-gray-50 p-2"
+                >
+                  {pokemonName ? (
+                    <>
+                      <div className="mb-1 flex h-16 w-16 items-center justify-center">
+                        {imageUrl ? (
+                          <img
+                            src={imageUrl}
+                            alt={pokemonName}
+                            className="h-16 w-16 object-contain"
+                          />
+                        ) : (
+                          <span className="flex h-16 w-16 items-center justify-center rounded bg-gray-200 text-xl font-bold text-gray-700 uppercase">
+                            {pokemonName.charAt(0)}
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-sm font-medium text-gray-700">
+                        {pokemonName}
                       </span>
-                    </div>
-                    <span className="text-sm font-medium text-gray-700">
-                      {pokemonName}
-                    </span>
-                  </>
-                ) : (
-                  <>
-                    <div className="mb-1 flex h-16 w-16 items-center justify-center">
-                      <span className="flex h-16 w-16 items-center justify-center rounded bg-gray-200 text-gray-400">
-                        -
-                      </span>
-                    </div>
-                    <span className="text-sm text-gray-400">Vazio</span>
-                  </>
-                )}
-              </div>
-            );
-          })}
+                    </>
+                  ) : (
+                    <>
+                      <div className="mb-1 flex h-16 w-16 items-center justify-center">
+                        <span className="flex h-16 w-16 items-center justify-center rounded bg-gray-200 text-gray-400">
+                          -
+                        </span>
+                      </div>
+                      <span className="text-sm text-gray-400">Vazio</span>
+                    </>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 export default function TeamBrowserPage() {
   const [teams, setTeams] = useState<any[]>([]);
