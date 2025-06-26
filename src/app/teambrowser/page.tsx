@@ -1,6 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Image from "next/image";
 import PlaceholderImage from "../../../public/klipartz.com.png";
@@ -26,7 +25,7 @@ const TeamCard = ({ team, onClick }: { team: any; onClick: () => void }) => (
     aria-label={`Abrir detalhes do time ${team.name}`}
   >
     <Image
-      src={team.imageUrl}
+      src={team.imageUrl || PlaceholderImage}
       alt={team.name}
       width={300}
       height={160}
@@ -85,7 +84,7 @@ const TeamModal = ({ team, onClose }: { team: any; onClose: () => void }) => (
         <h3 className="mb-2 text-lg font-semibold text-gray-700">Pokémons</h3>
         <div className="grid grid-cols-3 gap-4">
           {[...Array(6)].map((_, idx) => {
-            const pokemon = team.pokemon[idx];
+            const pokemon = team.pokemon?.[idx];
             return (
               <div
                 key={idx}
@@ -131,66 +130,35 @@ const TeamModal = ({ team, onClose }: { team: any; onClose: () => void }) => (
 );
 
 export default function TeamBrowserPage() {
-  const teams = [
-    {
-      id: "#TMB-001",
-      imageUrl: PlaceholderImage,
-      name: "Blazing Dragons",
-      types: ["Fire", "Dragon"],
-      pokemon: [
-        { name: "Charizard", image: "" },
-        { name: "Dragonite", image: "" },
-        { name: "Salamence", image: "" },
-        { name: "Garchomp", image: "" },
-        { name: "Reshiram", image: "" },
-        { name: "Dragapult", image: "" },
-      ],
-    },
-    {
-      id: "#TMB-002",
-      imageUrl: PlaceholderImage,
-      name: "Aqua Defenders",
-      types: "Water",
-      pokemon: [
-        { name: "Blastoise", image: "" },
-        { name: "Gyarados", image: "" },
-        { name: "Swampert", image: "" },
-        { name: "Milotic", image: "" },
-        { name: "Greninja", image: "" },
-        { name: "Ludicolo", image: "" },
-      ],
-    },
-    {
-      id: "#TMB-003",
-      imageUrl: PlaceholderImage,
-      name: "Forest Guardians",
-      types: "Grass",
-      pokemon: [
-        { name: "Venusaur", image: "" },
-        { name: "Sceptile", image: "" },
-        { name: "Torterra", image: "" },
-        { name: "Serperior", image: "" },
-        { name: "Decidueye", image: "" },
-        { name: "Rillaboom", image: "" },
-      ],
-    },
-    {
-      id: "#TMB-004",
-      imageUrl: PlaceholderImage,
-      name: "Shocking Speedsters",
-      types: "Electric",
-      pokemon: [
-        { name: "Raichu", image: "" },
-        { name: "Jolteon", image: "" },
-        { name: "Electivire", image: "" },
-        { name: "Magnezone", image: "" },
-        { name: "Zeraora", image: "" },
-        { name: "Rotom", image: "" },
-      ],
-    },
-  ];
-
+  const [teams, setTeams] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedTeam, setSelectedTeam] = useState<any | null>(null);
+
+  useEffect(() => {
+    async function fetchTeams() {
+      setLoading(true);
+      try {
+        // Replace with your backend API endpoint
+        const res = await fetch(
+          "https://pokedex-backend-woad.vercel.app/api/poketeams/search",
+        );
+        const data = await res.json();
+
+        // Map backend data to expected team shape
+        const mappedTeams = data.map((team: any) => ({
+          id: team.id || team._id || team.teamId,
+          name: team.teamName,
+          pokemon: team.pokemonNames,
+        }));
+
+        setTeams(mappedTeams);
+      } catch (e) {
+        setTeams([]);
+      }
+      setLoading(false);
+    }
+    fetchTeams();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans">
@@ -240,15 +208,21 @@ export default function TeamBrowserPage() {
               </button>
             </div>
 
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
-              {teams.map((team) => (
-                <TeamCard
-                  key={team.id}
-                  team={team}
-                  onClick={() => setSelectedTeam(team)}
-                />
-              ))}
-            </div>
+            {loading ? (
+              <div className="text-center text-gray-500">
+                Carregando times...
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
+                {teams.map((team) => (
+                  <TeamCard
+                    key={team.id}
+                    team={team}
+                    onClick={() => setSelectedTeam(team)}
+                  />
+                ))}
+              </div>
+            )}
 
             <div className="mt-8 flex items-center justify-center space-x-4">
               <button className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
