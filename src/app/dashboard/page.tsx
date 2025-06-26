@@ -5,9 +5,32 @@ import { useRouter } from "next/navigation";
 import PokeTeamSlot from "@/components/PokeTeamSlot";
 import PokeEvolution from "@/components/PokeEvolution";
 import { fetchPokemonList, fetchTypeAdvantages } from "@/utils/pokeapi";
-import PokeCardSearch from "@/components/PokeCardSearch";
+import PokeCardSearch from "../../components/PokeCardSearch";
 import PokeDetailsModal from "@/components/PokeDetailsModal";
 import PokeType from "@/components/aux components/type";
+import Navbar from "@/components/Navbar";
+
+// Add your list of all possible types here
+const ALL_TYPES = [
+  "normal",
+  "fire",
+  "water",
+  "electric",
+  "grass",
+  "ice",
+  "fighting",
+  "poison",
+  "ground",
+  "flying",
+  "psychic",
+  "bug",
+  "rock",
+  "ghost",
+  "dragon",
+  "dark",
+  "steel",
+  "fairy",
+];
 
 export default function Home() {
   const router = useRouter();
@@ -16,19 +39,11 @@ export default function Home() {
   useEffect(() => {
     const token =
       typeof window !== "undefined" ? localStorage.getItem("token") : null;
-    // Replace this with your real validation logic (e.g., JWT decode/verify)
-    const isValidToken = !!token && token.length > 10; // Example: token must exist and be >10 chars
-
+    const isValidToken = !!token && token.length > 10;
     if (!isValidToken) {
       router.replace("/");
     }
   }, [router]);
-
-  // Log out handler
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    router.replace("/");
-  };
 
   const [team, setTeam] = useState<(string | null)[]>([
     null,
@@ -52,6 +67,13 @@ export default function Home() {
 
   const [currentScreen, setCurrentScreen] = useState(0);
 
+  // Pagination state for search
+  const [searchPage, setSearchPage] = useState(1);
+  const pageSize = 15;
+
+  // Type filter state
+  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
+
   const handleNextScreen = () => {
     setCurrentScreen((prev) => (prev + 1) % 2);
   };
@@ -61,8 +83,10 @@ export default function Home() {
   };
 
   useEffect(() => {
+    console.log("Loading Pokemon List..."); // Log for debugging
     const loadPokemonList = async () => {
       const list = await fetchPokemonList();
+      console.log("Pokemon List Loaded:", list); // Log for debugging
       setPokemonList(list);
     };
     loadPokemonList();
@@ -146,6 +170,35 @@ export default function Home() {
     }
   }
 
+  // Reset search page when search query or filters change or search is closed
+  useEffect(() => {
+    setSearchPage(1);
+  }, [searchQuery, selectedSlot, selectedTypes]);
+
+  // Filtered pokemon for search and type filter
+  const filteredPokemon = pokemonList.filter((pokemon) => {
+    const matchesQuery = pokemon.name
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase());
+    const matchesType =
+      selectedTypes.length === 0 ||
+      selectedTypes.every((type) => pokemon.types.includes(type));
+    return matchesQuery && matchesType;
+  });
+  console.log("Filtered Pokemon:", filteredPokemon);
+  const totalPages = Math.ceil(filteredPokemon.length / pageSize);
+  const paginatedPokemon = filteredPokemon.slice(
+    (searchPage - 1) * pageSize,
+    searchPage * pageSize,
+  );
+
+  // Type filter toggle handler
+  const toggleType = (type: string) => {
+    setSelectedTypes((prev) =>
+      prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type],
+    );
+  };
+
   return (
     <div className="max-h-max min-h-screen w-screen bg-gray-50 font-sans">
       <PokeDetailsModal
@@ -158,29 +211,8 @@ export default function Home() {
         poke_desc={modalPokeDesc}
         handleAddPokemon={handleAddPokemon}
       />
-      <header className="bg-gradient-to-r from-red-500 to-red-700 p-6 shadow-md">
-        <nav className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-white">
-            Pokémon Team Builder
-          </h1>
-          <div className="flex items-center gap-4">
-            <button
-              className="rounded bg-white px-4 py-2 font-semibold text-red-600 hover:bg-gray-100"
-              onClick={() => router.push("/teams")}
-            >
-              Ver Times
-            </button>
-            <p className="text-sm text-gray-200">
-              Breno de Moura | Lucas Breda | Pedro Mariotti
-            </p>
-            <button
-              className="ml-4 rounded bg-white px-4 py-2 font-semibold text-red-600 hover:bg-gray-100"
-              onClick={handleLogout}
-            >
-              Log Out
-            </button>
-          </div>
-        </nav>
+      <header>
+        <Navbar />
       </header>
 
       <main className="px-4 py-8 md:px-16">
@@ -317,39 +349,79 @@ export default function Home() {
                   Cancelar
                 </button>
               </div>
+              {/* Type Filters */}
+              <div className="mt-4 flex flex-wrap gap-2">
+                {ALL_TYPES.map((type) => (
+                  <button
+                    key={type}
+                    className={`rounded border px-3 py-1 text-sm font-semibold ${
+                      selectedTypes.includes(type)
+                        ? "border-red-500 bg-red-500 text-white"
+                        : "border-gray-300 bg-white text-gray-700"
+                    } hover:bg-red-100`}
+                    onClick={() => toggleType(type)}
+                    type="button"
+                  >
+                    {type.charAt(0).toUpperCase() + type.slice(1)}
+                  </button>
+                ))}
+                {selectedTypes.length > 0 && (
+                  <button
+                    className="rounded border border-gray-300 bg-gray-200 px-3 py-1 text-sm font-semibold text-gray-700 hover:bg-gray-300"
+                    onClick={() => setSelectedTypes([])}
+                    type="button"
+                  >
+                    Limpar Filtros
+                  </button>
+                )}
+              </div>
               <ul className="flex flex-col gap-4 md:grid md:grid-cols-3">
-                {pokemonList
-                  .filter((pokemon) =>
-                    pokemon.name
-                      .toLowerCase()
-                      .includes(searchQuery.toLowerCase()),
-                  )
-                  .map((pokemon) => (
-                    <PokeCardSearch
-                      key={pokemon.name}
-                      poke_name={pokemon.name}
-                      poke_types={pokemon.types}
-                      poke_image={pokemon.sprite}
-                      poke_number={pokemon.id}
-                      setOpenModal={setOpenModal}
-                      setModalPokeDesc={setModalPokeDesc}
-                      setModalPokeImage={setModalPokeImage}
-                      setModalTypeArray={setModalPokeTypes}
-                      setmodalPokeNumber={setmodalPokeNumber}
-                      setModalPokeName={setmodalPokeName}
-                      poke_desc={""}
-                    />
-                  ))}
-                {pokemonList.filter((pokemon) =>
-                  pokemon.name
-                    .toLowerCase()
-                    .includes(searchQuery.toLowerCase()),
-                ).length === 0 && (
+                {paginatedPokemon.map((pokemon) => (
+                  <PokeCardSearch
+                    key={pokemon.name}
+                    poke_name={pokemon.name}
+                    poke_types={pokemon.types}
+                    poke_image={pokemon.sprite}
+                    poke_number={pokemon.id}
+                    setOpenModal={setOpenModal}
+                    setModalPokeDesc={setModalPokeDesc}
+                    setModalPokeImage={setModalPokeImage}
+                    setModalTypeArray={setModalPokeTypes}
+                    setmodalPokeNumber={setmodalPokeNumber}
+                    setModalPokeName={setmodalPokeName}
+                    poke_desc={""}
+                  />
+                ))}
+                {filteredPokemon.length === 0 && (
                   <p className="col-span-3 text-center text-gray-500">
                     Nenhum Pokémon encontrado.
                   </p>
                 )}
               </ul>
+              {/* Pagination controls */}
+              {filteredPokemon.length > pageSize && (
+                <div className="mt-4 flex justify-center gap-2">
+                  <button
+                    className="rounded bg-gray-200 px-3 py-1 text-gray-700 hover:bg-gray-300 disabled:opacity-50"
+                    onClick={() => setSearchPage((p) => Math.max(1, p - 1))}
+                    disabled={searchPage === 1}
+                  >
+                    Anterior
+                  </button>
+                  <span className="px-2 py-1 text-gray-700">
+                    Página {searchPage} de {totalPages}
+                  </span>
+                  <button
+                    className="rounded bg-gray-200 px-3 py-1 text-gray-700 hover:bg-gray-300 disabled:opacity-50"
+                    onClick={() =>
+                      setSearchPage((p) => Math.min(totalPages, p + 1))
+                    }
+                    disabled={searchPage === totalPages}
+                  >
+                    Próxima
+                  </button>
+                </div>
+              )}
             </div>
           </section>
         )}

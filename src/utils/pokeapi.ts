@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export async function fetchPokemonList() {
-  const response = await fetch("https://pokeapi.co/api/v2/pokemon?limit=1000");
+  const response = await fetch("https://pokeapi.co/api/v2/pokemon?limit=2000");
   const data = await response.json();
+  console.log("Pokemon List Data:", data);
 
   const pokemonList = await Promise.all(
     data.results.map(async (pokemon: any) => {

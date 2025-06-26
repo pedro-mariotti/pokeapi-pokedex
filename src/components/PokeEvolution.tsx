@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from "react";
+import Image from "next/image";
 
 interface Evolution {
   id: number;
@@ -25,7 +26,7 @@ export default function PokeEvolution({ pokemonName }: PokeEvolutionProps) {
         setError(null);
 
         const speciesResponse = await fetch(
-          `https://pokeapi.co/api/v2/pokemon-species/${pokemonName}`,
+          `https://pokedex-backend-woad.vercel.app/api/pokemon/${pokemonName}/species`,
         );
         const speciesData = await speciesResponse.json();
 
@@ -37,7 +38,7 @@ export default function PokeEvolution({ pokemonName }: PokeEvolutionProps) {
 
         while (currentEvolution) {
           const pokemonResponse = await fetch(
-            `https://pokeapi.co/api/v2/pokemon/${currentEvolution.species.name}`,
+            `https://pokedex-backend-woad.vercel.app/api/pokemon/${currentEvolution.species.name}`,
           );
           const pokemonData = await pokemonResponse.json();
 
@@ -97,19 +98,25 @@ export default function PokeEvolution({ pokemonName }: PokeEvolutionProps) {
           <div key={evolution.id} className="flex items-center">
             {/* Pokémon Sprite */}
             <div className="flex flex-col items-center">
-              <img
+              <Image
                 src={evolution.sprite}
                 alt={evolution.name}
+                width={64}
+                height={64}
                 className="h-16 w-16"
+                unoptimized
               />
               <p className="font-bold capitalize">{evolution.name}</p>
               <p className="text-sm">{evolution.method}</p>
               {evolution.item && (
                 <div className="flex items-center gap-2">
-                  <img
+                  <Image
                     src={evolution.item.sprite}
                     alt={evolution.item.name}
+                    width={32}
+                    height={32}
                     className="h-8 w-8"
+                    unoptimized
                   />
                   <span className="text-xs capitalize">
                     {evolution.item.name}

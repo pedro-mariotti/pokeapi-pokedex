@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import PlaceholderEevee from "../../public/klipartz.com.png";
 
 interface SavedPokeTeamSlotProps {
   name: string;
@@ -34,36 +35,23 @@ const SavedPokeTeamSlot: React.FC<SavedPokeTeamSlotProps> = ({ name }) => {
       });
   }, [name]);
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
+  if (loading) return <div className="py-4 text-center">Loading...</div>;
+  if (error)
+    return <div className="py-4 text-center text-red-500">Error: {error}</div>;
   if (!pokemon) return null;
 
   return (
-    <div
-      style={{
-        border: "1px solid #ccc",
-        borderRadius: 8,
-        padding: 16,
-        width: 150,
-        textAlign: "center",
-        boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-        background: "#fff",
-      }}
-    >
-      <Image
-        src={pokemon.sprites.front_default}
-        alt={name}
-        width={64}
-        height={64}
-        style={{ borderRadius: 8, marginBottom: 8 }}
-      />
-      <div
-        style={{
-          marginTop: 8,
-          fontWeight: "bold",
-          textTransform: "capitalize",
-        }}
-      >
+    <div className="mx-auto flex w-full max-w-[180px] flex-col items-center rounded-lg border border-gray-300 bg-white p-2 text-center shadow-md sm:max-w-[150px] sm:p-4">
+      <div className="flex h-20 w-20 items-center justify-center sm:h-16 sm:w-16">
+        <Image
+          src={pokemon.sprites.front_default || PlaceholderEevee}
+          alt={name}
+          width={80}
+          height={80}
+          className="h-full w-full rounded-lg object-contain"
+        />
+      </div>
+      <div className="mt-2 text-base font-bold break-words capitalize sm:text-lg">
         {name}
       </div>
     </div>

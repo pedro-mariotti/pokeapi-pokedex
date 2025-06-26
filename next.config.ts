@@ -13,9 +13,28 @@ const nextConfig: NextConfig = {
         hostname: "raw.githubusercontent.com",
         pathname: "/PokeAPI/sprites/master/sprites/pokemon/**", // Para sprites do GitHub
       },
+      {
+        protocol: "https",
+        hostname: "i.pinimg.com",
+      },
+      {
+        protocol: "https",
+        hostname: "assets.pokemon.com",
+      },
+      {
+        protocol: "https",
+        hostname: "www.mundodeportivo.com",
+      },
+      {
+        protocol: "https",
+        hostname: "www.vortex.gg",
+      },
+      {
+        protocol: "https",
+        hostname: "randomuser.me",
+      },
     ],
   },
 };
 
 export default nextConfig;
-
