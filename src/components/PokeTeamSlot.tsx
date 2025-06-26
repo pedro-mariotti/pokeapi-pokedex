@@ -23,7 +23,7 @@ export default function PokeTeamSlot({
     const fetchData = async () => {
       try {
         const res = await fetch(
-          `https://pokeapi.co/api/v2/pokemon/${pokemonName.toLowerCase()}`,
+          `https://pokedex-backend-woad.vercel.app/api/pokemon/${pokemonName.toLowerCase()}`,
         );
         if (!res.ok) {
           setPokemonData(null);

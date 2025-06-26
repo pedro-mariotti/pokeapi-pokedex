@@ -45,11 +45,6 @@ export default function Home() {
     }
   }, [router]);
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    router.replace("/");
-  };
-
   const [team, setTeam] = useState<(string | null)[]>([
     null,
     null,

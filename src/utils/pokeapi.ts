@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export async function fetchPokemonList() {
-  const response = await fetch("https://pokeapi.co/api/v2/pokemon?limit=1000");
+  const response = await fetch(
+    "https://pokedex-backend-woad.vercel.app/api/pokemon?limit=1000",
+  );
   const data = await response.json();
 
   const pokemonList = await Promise.all(
